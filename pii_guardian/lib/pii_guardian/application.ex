@@ -11,6 +11,9 @@ defmodule PIIGuardian.Application do
       # Pub/Sub system
       {Phoenix.PubSub, name: PIIGuardian.PubSub},
       
+      # Phoenix endpoint
+      PIIGuardianWeb.Endpoint,
+      
       # Finch HTTP client
       {Finch, name: PIIGuardian.Finch},
       

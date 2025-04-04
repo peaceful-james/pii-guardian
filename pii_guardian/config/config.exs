@@ -3,6 +3,16 @@ import Config
 config :pii_guardian,
   ecto_repos: [PIIGuardian.Repo]
 
+# Configure the Phoenix endpoint
+config :pii_guardian, PIIGuardianWeb.Endpoint,
+  url: [host: "localhost"],
+  render_errors: [
+    formats: [html: PIIGuardianWeb.ErrorHTML, json: PIIGuardianWeb.ErrorJSON],
+    layout: false
+  ],
+  pubsub_server: PIIGuardian.PubSub,
+  live_view: [signing_salt: "j4FLMHdG"]
+
 config :pii_guardian, PIIGuardian.Repo,
   database: "pii_guardian_#{config_env()}",
   username: "postgres",

@@ -28,6 +28,13 @@ defmodule PIIGuardian.MixProject do
   # Specifies your project dependencies.
   defp deps do
     [
+      # Phoenix framework
+      {:phoenix, "~> 1.8.0-rc.0", override: true},
+      {:phoenix_ecto, "~> 4.5"},
+      {:phoenix_live_dashboard, "~> 0.8"},
+      {:esbuild, "~> 0.9", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
+      
       # Slack API client
       {:slack, "~> 0.23.5"},
       
