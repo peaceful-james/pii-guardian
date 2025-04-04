@@ -12,7 +12,7 @@ defmodule PiiGuardian.Application do
       PiiGuardian.Repo,
       {DNSCluster, query: Application.get_env(:pii_guardian, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: PiiGuardian.PubSub},
-      {Slack.Supervisor, Application.fetch_env!(:pii_guardian, PiiGuardian.SlackBot)},
+      {Slack.Supervisor, Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)},
       # Start a worker by calling: PiiGuardian.Worker.start_link(arg)
       # {PiiGuardian.Worker, arg},
       # Start to serve requests, typically the last entry

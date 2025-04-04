@@ -20,10 +20,10 @@ if System.get_env("PHX_SERVER") do
   config :pii_guardian, PiiGuardianWeb.Endpoint, server: true
 end
 
-config :pii_guardian, PiiGuardian.SlackBot,
+config :pii_guardian, PiiGuardian.Slackbot,
   app_token: System.fetch_env!("PII_GUARDIAN_SLACK_APP_TOKEN"),
   bot_token: System.fetch_env!("PII_GUARDIAN_SLACK_BOT_TOKEN"),
-  bot: PiiGuardian.SlackBot
+  bot: PiiGuardian.Slackbot
 
 if config_env() == :prod do
   import_config "runtime_prod.exs"
