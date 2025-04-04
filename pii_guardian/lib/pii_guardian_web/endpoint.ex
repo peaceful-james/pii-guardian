@@ -36,12 +36,11 @@ defmodule PiiGuardianWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
-  plug PiiGuardianWeb.Plugs.RawBodyReader
-
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
-    json_decoder: Phoenix.json_library()
+    json_decoder: Phoenix.json_library(),
+    body_reader: {PiiGuardianWeb.Endpoint.BodyReader, :read_body, []}
 
   plug Plug.MethodOverride
   plug Plug.Head

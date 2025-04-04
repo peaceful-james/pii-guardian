@@ -1,4 +1,4 @@
-defmodule PiiGuardianWeb.Plugs.RawBodyReader do
+defmodule PiiGuardianWeb.Endpoint.BodyReader do
   @moduledoc """
   Puts the raw body of the request into the connection's private map.
 
@@ -10,10 +10,9 @@ defmodule PiiGuardianWeb.Plugs.RawBodyReader do
 
   Moreover, the raw body can only be read once, so we need to store it
   """
-  def init(opts), do: opts
-
-  def call(conn, _opts) do
-    {:ok, body, conn} = Plug.Conn.read_body(conn)
-    Plug.Conn.put_private(conn, :raw_body, body)
+  def read_body(conn, opts) do
+    {:ok, body, conn} = Plug.Conn.read_body(conn, opts)
+    conn = Plug.Conn.put_private(conn, :raw_body, body)
+    {:ok, body, conn}
   end
 end
