@@ -22,3 +22,9 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - The Slack events come via a webhook. If app goes down, we lose events.
 - I am verifying the Notion events with the verification token. This is good.
 - We should batch updates to the same notion "page" together. `:flow` could be good for this.
+- test new slack msg
+- test edited slack msg
+- test new slack comment
+- test edited slack comment
+- test new slack attachment
+- test edited slack attachment
