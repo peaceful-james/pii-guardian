@@ -19,4 +19,6 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 
 ## Considerations
 
-- The Slack events come via a webhook. If app goes down, do we lose events?
+- The Slack events come via a webhook. If app goes down, we lose events.
+- I am verifying the Notion events with the verification token. This is good.
+- We should batch updates to the same notion "page" together. `:flow` could be good for this.
