@@ -18,17 +18,17 @@ defmodule PiiGuardian.DataCase do
 
   using do
     quote do
-      alias PiiGuardian.Repo
-
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
       import PiiGuardian.DataCase
+
+      alias PiiGuardian.Repo
     end
   end
 
   setup tags do
-    PiiGuardian.DataCase.setup_sandbox(tags)
+    __MODULE__.setup_sandbox(tags)
     :ok
   end
 

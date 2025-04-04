@@ -20,14 +20,14 @@ defmodule PiiGuardianWeb.ConnCase do
   using do
     quote do
       # The default endpoint for testing
-      @endpoint PiiGuardianWeb.Endpoint
-
       use PiiGuardianWeb, :verified_routes
 
       # Import conveniences for testing with connections
-      import Plug.Conn
       import Phoenix.ConnTest
       import PiiGuardianWeb.ConnCase
+      import Plug.Conn
+
+      @endpoint PiiGuardianWeb.Endpoint
     end
   end
 
