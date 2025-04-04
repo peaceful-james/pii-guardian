@@ -8,4 +8,11 @@ defmodule PiiGuardianWeb.Router do
   scope "/api", PiiGuardianWeb do
     pipe_through :api
   end
+
+  # Webhook routes
+  scope "/webhooks", PiiGuardianWeb do
+    pipe_through :api
+
+    post "/notion", NotionController, :events
+  end
 end
