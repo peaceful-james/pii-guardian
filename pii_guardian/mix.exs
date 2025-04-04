@@ -33,6 +33,7 @@ defmodule PiiGuardian.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:slack_elixir, "~> 1.2"},
       {:green, ">= 0.1.4", only: :dev},
       {:tailwind_formatter, "~> 0.4.2", only: :dev, runtime: false},
       {:styler, "~> 0.11", only: :dev, runtime: false},
