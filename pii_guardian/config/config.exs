@@ -8,6 +8,7 @@
 import Config
 
 config :pii_guardian,
+  env: config_env(),
   ecto_repos: [PiiGuardian.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
