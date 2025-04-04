@@ -7,6 +7,7 @@ defmodule PiiGuardian.Slackbot do
   @impl true
   def handle_event("message", %{"channel" => channel, "text" => text, "user" => user}, _bot) do
     Logger.info("Received message from user: #{user}")
+
     if String.match?(text, ~r/hello/i) do
       send_message(channel, "Hello! <@#{user}>")
     end
