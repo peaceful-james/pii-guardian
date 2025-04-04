@@ -1,20 +1,16 @@
 defmodule PiiGuardian.Slackbot do
-  @moduledoc false
+  @moduledoc """
+  The "edge" of the Slack event handling system.
+
+  This module is responsible for receiving events from Slack and
+  saving them as Oban jobs for processing.
+  """
   use Slack.Bot
 
-  require Logger
+  alias PiiGuardian.SlackObanWorker
 
-  @impl true
-  def handle_event("message", %{"channel" => channel, "text" => text, "user" => user}, _bot) do
-    Logger.info("Received message from user: #{user}")
-
-    if String.match?(text, ~r/hello/i) do
-      send_message(channel, "Hello! <@#{user}>")
-    end
-  end
-
-  def handle_event(type, payload, _bot) do
-    Logger.warning("Unhandled #{type} event: #{inspect(payload)}")
-    :ok
+  @impl Slack.Bot
+  def handle_event("message", event, _bot) do
+    SlackObanWorker.enqueue_event_to_handle(event)
   end
 end
