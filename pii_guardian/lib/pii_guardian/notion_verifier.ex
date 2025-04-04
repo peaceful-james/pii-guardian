@@ -1,4 +1,5 @@
-defmodule NotionVerifier do
+defmodule PiiGuardian.NotionVerifier do
+  @moduledoc false
   @doc """
   Verifies a Notion webhook signature to ensure the request is legitimate.
 
@@ -19,10 +20,11 @@ defmodule NotionVerifier do
     body_json = Jason.encode!(body)
 
     # Calculate signature
-    calculated_signature = "sha256=" <> (
-      :crypto.mac(:hmac, :sha256, verification_token, body_json)
-      |> Base.encode16(case: :lower)
-    )
+    calculated_signature =
+      "sha256=" <>
+        (:hmac
+         |> :crypto.mac(:sha256, verification_token, body_json)
+         |> Base.encode16(case: :lower))
 
     # Extract Notion signature from headers
     notion_signature = headers["X-Notion-Signature"]
@@ -34,4 +36,3 @@ defmodule NotionVerifier do
     end
   end
 end
-
