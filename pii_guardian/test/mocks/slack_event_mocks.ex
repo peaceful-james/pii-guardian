@@ -3,7 +3,102 @@ defmodule PiiGuardian.SlackEventMocks do
    Mocks for Slack events. These are used in tests to simulate Slack events.
   """
 
-  def thread_message_with_attachment do
+  def new_message do
+    %{
+      "blocks" => [
+        %{
+          "block_id" => "XXXXXX",
+          "elements" => [
+            %{
+              "elements" => [%{"text" => "yes", "type" => "text"}],
+              "type" => "rich_text_section"
+            }
+          ],
+          "type" => "rich_text"
+        }
+      ],
+      "channel" => "CXXXXXXXXXX",
+      "channel_type" => "channel",
+      "client_msg_id" => "fake-client-msg-id-abcdef",
+      "event_ts" => "1743806350.485119",
+      "team" => "TXXXXXXXXXX",
+      "text" => "yes",
+      "ts" => "1743806350.485119",
+      "type" => "message",
+      "user" => "UXXXXXXXXXX"
+    }
+  end
+
+  def edited_message do
+    %{
+      "channel" => "CXXXXXXXXXX",
+      "channel_type" => "channel",
+      "event_ts" => "1743806452.001200",
+      "hidden" => true,
+      "message" => %{
+        "blocks" => [
+          %{
+            "block_id" => "XXXXXX",
+            "elements" => [
+              %{
+                "elements" => [%{"text" => "hello again", "type" => "text"}],
+                "type" => "rich_text_section"
+              }
+            ],
+            "type" => "rich_text"
+          }
+        ],
+        "client_msg_id" => "fake-client-msg-id-123456",
+        "edited" => %{"ts" => "1743806452.000000", "user" => "UXXXXXXXXXX"},
+        "is_locked" => false,
+        "latest_reply" => "1743789529.806319",
+        "reply_count" => 2,
+        "reply_users" => ["UXXXXXXXXXX"],
+        "reply_users_count" => 1,
+        "source_team" => "TXXXXXXXXXX",
+        "team" => "TXXXXXXXXXX",
+        "text" => "hello again",
+        "thread_ts" => "1743789192.312789",
+        "ts" => "1743789192.312789",
+        "type" => "message",
+        "user" => "UXXXXXXXXXX",
+        "user_team" => "TXXXXXXXXXX"
+      },
+      "previous_message" => %{
+        "blocks" => [
+          %{
+            "block_id" => "XXXXXX",
+            "elements" => [
+              %{
+                "elements" => [%{"text" => "hello", "type" => "text"}],
+                "type" => "rich_text_section"
+              }
+            ],
+            "type" => "rich_text"
+          }
+        ],
+        "client_msg_id" => "fake-client-msg-id-123456",
+        "is_locked" => false,
+        "last_read" => "1743789529.806319",
+        "latest_reply" => "1743789529.806319",
+        "reply_count" => 2,
+        "reply_users" => ["UXXXXXXXXXX"],
+        "reply_users_count" => 1,
+        "subscribed" => true,
+        "team" => "TXXXXXXXXXX",
+        "text" => "hello",
+        "thread_ts" => "1743789192.312789",
+        "ts" => "1743789192.312789",
+        "type" => "message",
+        "user" => "UXXXXXXXXXX"
+      },
+      "subtype" => "message_changed",
+      "ts" => "1743806452.001200",
+      "type" => "message"
+    }
+  end
+
+  def new_thread_message_with_attachment do
     %{
       "accepts_response_payload" => false,
       "envelope_id" => "fake-envelope-id-123456-abcdef",
