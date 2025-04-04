@@ -25,7 +25,7 @@ config :pii_guardian, PiiGuardian.Slackbot,
   bot_token: System.fetch_env!("PII_GUARDIAN_SLACK_BOT_TOKEN"),
   bot: PiiGuardian.Slackbot
 
-config :pii_guardian, PiiGuardian.NotionVerifier,
+config :pii_guardian, PiiGuardianWeb.Plugs.NotionVerificationPlug,
   verification_token: System.fetch_env!("PII_GUARDIAN_NOTION_VERIFICATION_TOKEN")
 
 if config_env() == :prod do
