@@ -6,37 +6,37 @@ PII Guardian monitors Slack channels and Notion databases, detecting personally 
 ## System Components
 
 ### Core Application
-- `PIIGuardian.Application` - Main application supervisor
-- `PIIGuardian.PubSub` - Internal event pub/sub system
+- `PiiGuardian.Application` - Main application supervisor
+- `PiiGuardian.PubSub` - Internal event pub/sub system
 
 ### Slack Integration
-- `PIIGuardian.Slack.Supervisor` - Manages Slack-related processes
-- `PIIGuardian.Slack.Connector` - Handles Slack API authentication and real-time messaging
-- `PIIGuardian.Slack.EventHandler` - Processes incoming Slack events
-- `PIIGuardian.Slack.MessageProcessor` - Extracts message content for analysis
-- `PIIGuardian.Slack.Actions` - Functions for message deletion and user notifications
+- `PiiGuardian.Slack.Supervisor` - Manages Slack-related processes
+- `PiiGuardian.Slack.Connector` - Handles Slack API authentication and real-time messaging
+- `PiiGuardian.Slack.EventHandler` - Processes incoming Slack events
+- `PiiGuardian.Slack.MessageProcessor` - Extracts message content for analysis
+- `PiiGuardian.Slack.Actions` - Functions for message deletion and user notifications
 
 ### Notion Integration
-- `PIIGuardian.Notion.Supervisor` - Manages Notion-related processes
-- `PIIGuardian.Notion.Connector` - Handles Notion API authentication
-- `PIIGuardian.Notion.Poller` - Periodically checks for new/updated database entries
-- `PIIGuardian.Notion.PageProcessor` - Extracts content from Notion pages
-- `PIIGuardian.Notion.Actions` - Functions for page deletion and author identification
+- `PiiGuardian.Notion.Supervisor` - Manages Notion-related processes
+- `PiiGuardian.Notion.Connector` - Handles Notion API authentication
+- `PiiGuardian.Notion.Poller` - Periodically checks for new/updated database entries
+- `PiiGuardian.Notion.PageProcessor` - Extracts content from Notion pages
+- `PiiGuardian.Notion.Actions` - Functions for page deletion and author identification
 
 ### PII Detection
-- `PIIGuardian.PII.Analyzer` - Coordinates PII analysis using multiple detectors
-- `PIIGuardian.PII.TextDetector` - Analyzes text content for PII
-- `PIIGuardian.PII.ImageDetector` - Extracts and analyzes text from images
-- `PIIGuardian.PII.PDFDetector` - Extracts and analyzes text from PDFs
-- `PIIGuardian.PII.AIService` - Integration with AI services for PII detection
+- `PiiGuardian.PII.Analyzer` - Coordinates PII analysis using multiple detectors
+- `PiiGuardian.PII.TextDetector` - Analyzes text content for PII
+- `PiiGuardian.PII.ImageDetector` - Extracts and analyzes text from images
+- `PiiGuardian.PII.PDFDetector` - Extracts and analyzes text from PDFs
+- `PiiGuardian.PII.AIService` - Integration with AI services for PII detection
 
 ### User Management
-- `PIIGuardian.Users.Resolver` - Maps between Notion and Slack users
+- `PiiGuardian.Users.Resolver` - Maps between Notion and Slack users
 
 ### Configuration
-- `PIIGuardian.Config` - Application configuration management
-- `PIIGuardian.Config.SlackChannels` - Maintains list of watched Slack channels
-- `PIIGuardian.Config.NotionDatabases` - Maintains list of watched Notion databases
+- `PiiGuardian.Config` - Application configuration management
+- `PiiGuardian.Config.SlackChannels` - Maintains list of watched Slack channels
+- `PiiGuardian.Config.NotionDatabases` - Maintains list of watched Notion databases
 
 ## Data Flow
 
