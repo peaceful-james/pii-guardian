@@ -87,8 +87,7 @@ defmodule PiiGuardian.SlackEventMocks do
           "upload" => false,
           "user" => "UXXXXXXXXXX"
         },
-        "event_context" =>
-          "fake-event-context-123456",
+        "event_context" => "fake-event-context-123456",
         "event_id" => "EvXXXXXXXXXX",
         "event_time" => 1_743_789_529,
         "is_ext_shared_channel" => false,
