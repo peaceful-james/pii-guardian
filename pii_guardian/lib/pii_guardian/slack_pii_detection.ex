@@ -2,15 +2,19 @@ defmodule PiiGuardian.SlackPiiDetection do
   @moduledoc """
   Detect if a Slack event contains PII (Personally Identifiable Information).
   """
+  alias PiiGuardian.AnthropicPiiDetection
+  alias PiiGuardian.Slackbot
 
   @doc """
   Detects if a Slack event contains PII (Personally Identifiable Information).
   """
-  def contains_pii?(%{"type" => "message", "text" => text}) do
-    text_contains_pii?(text)
+  def detect_pii_in_text(%{"type" => "message", "text" => text}) do
+    AnthropicPiiDetection.detect_pii_in_text(text)
   end
 
-  defp text_contains_pii?(text) when is_binary(text) do
-    String.contains?(text, "[CONTAINS_PII]")
+  def detect_pii_in_file(%{"url_private" => url_private}) do
+    url_private
+    |> Slackbot.read_file!()
+    |> AnthropicPiiDetection.detect_pii_in_pdf()
   end
 end

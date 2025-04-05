@@ -15,7 +15,8 @@ defmodule PiiGuardian.Slackbot do
   end
 
   def delete_slack_message_and_dm_author(
-        %{"channel" => channel, "text" => text, "ts" => ts, "user" => user} = _event
+        %{"channel" => channel, "text" => text, "ts" => ts, "user" => user} = _event,
+        explanation
       ) do
     dm(channel, user, """
     Hi there!
@@ -25,6 +26,10 @@ defmodule PiiGuardian.Slackbot do
     Here is what you wrote:
 
     > #{text}
+
+    Here is the reason why I deleted it:
+
+    > #{explanation}
 
     Please be careful about sharing personal information in public channels.
     """)
