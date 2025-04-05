@@ -30,7 +30,8 @@ defmodule PiiGuardian.NotionPiiDetection do
   Detects if a specific Notion block contains PII.
   Takes a block_id and checks its content for PII.
   """
-  @spec detect_pii_in_block(String.t()) :: :safe | {:unsafe, String.t(), String.t()}
+  @spec detect_pii_in_block(String.t()) ::
+          :safe | {:unsafe, String.t(), String.t() | [{String.t(), String.t()}]}
   def detect_pii_in_block(block_id) when is_binary(block_id) do
     Logger.debug("Checking Notion block for PII: #{block_id}")
 

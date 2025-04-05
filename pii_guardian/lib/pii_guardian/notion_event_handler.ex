@@ -37,29 +37,7 @@ defmodule PiiGuardian.NotionEventHandler do
 
     Logger.info("Page created in workspace #{workspace_name} with ID: #{page_id}")
 
-    # Check the new page for PII
-    case NotionPiiDetection.detect_pii_in_page(page_id) do
-      :safe ->
-        Logger.info("No PII detected in newly created page #{page_id}")
-        :ok
-
-      {:unsafe, ^page_id, explanation} when is_binary(explanation) ->
-        Logger.warning("PII detected in newly created page #{page_id}: #{explanation}")
-        # Archive the page with PII
-        delete_page_and_notify_authors(page_id, event, explanation)
-
-      {:unsafe, ^page_id, unsafe_block_file_results} when is_list(unsafe_block_file_results) ->
-        explanation =
-          Enum.map_join(unsafe_block_file_results, "\n\n", fn %{explanation: explanation} ->
-            explanation
-          end)
-
-        Logger.warning(
-          "Unsafe block file(s) detected in page ID #{page_id}, explanation: #{explanation}"
-        )
-
-        delete_page_and_notify_authors(page_id, event, explanation)
-    end
+    check_entire_page_for_pii(page_id, event)
   end
 
   defp handle_page_deleted(event) do
@@ -91,17 +69,32 @@ defmodule PiiGuardian.NotionEventHandler do
       # Check individual updated blocks for PII
       check_blocks_for_pii(updated_blocks, page_id, event)
     else
-      # If no specific blocks mentioned, check the entire page
-      case NotionPiiDetection.detect_pii_in_page(page_id) do
-        :safe ->
-          Logger.info("No PII detected in updated page #{page_id}")
-          :ok
+      check_entire_page_for_pii(page_id, event)
+    end
+  end
 
-        {:unsafe, _, explanation} ->
-          Logger.warning("PII detected in updated page #{page_id}: #{explanation}")
-          # Archive the page with PII
-          delete_page_and_notify_authors(page_id, event, explanation)
-      end
+  defp check_entire_page_for_pii(page_id, event) do
+    case NotionPiiDetection.detect_pii_in_page(page_id) do
+      :safe ->
+        Logger.info("No PII detected in newly created page #{page_id}")
+        :ok
+
+      {:unsafe, ^page_id, explanation} when is_binary(explanation) ->
+        Logger.warning("PII detected in newly created page #{page_id}: #{explanation}")
+        # Archive the page with PII
+        delete_page_and_notify_authors(page_id, event, explanation)
+
+      {:unsafe, ^page_id, unsafe_block_file_results} when is_list(unsafe_block_file_results) ->
+        explanation =
+          Enum.map_join(unsafe_block_file_results, "\n\n", fn %{explanation: explanation} ->
+            explanation
+          end)
+
+        Logger.warning(
+          "Unsafe block file(s) detected in page ID #{page_id}, explanation: #{explanation}"
+        )
+
+        delete_page_and_notify_authors(page_id, event, explanation)
     end
   end
 
@@ -114,17 +107,28 @@ defmodule PiiGuardian.NotionEventHandler do
       end)
       |> Enum.filter(fn {_, result} -> result != :safe end)
 
-    if pii_blocks == [] do
-      Logger.info("No PII detected in any of the updated blocks on page #{page_id}")
-      :ok
-    else
-      # Get the first block with PII and its explanation
-      {block_id, {:unsafe, _, explanation}} = List.first(pii_blocks)
+    case pii_blocks do
+      [] ->
+        Logger.info("No PII detected in any of the updated blocks on page #{page_id}")
+        :ok
 
-      Logger.warning("PII detected in block #{block_id} on page #{page_id}: #{explanation}")
+      [{:unsafe, ^page_id, explanation} | _] when is_binary(explanation) ->
+        Logger.warning("PII detected in newly created page #{page_id}: #{explanation}")
+        # Archive the page with PII
+        delete_page_and_notify_authors(page_id, event, explanation)
 
-      # Archive the page with PII
-      delete_page_and_notify_authors(page_id, event, explanation)
+      [{:unsafe, ^page_id, unsafe_block_file_results} | _]
+      when is_list(unsafe_block_file_results) ->
+        explanation =
+          Enum.map_join(unsafe_block_file_results, "\n\n", fn %{explanation: explanation} ->
+            explanation
+          end)
+
+        Logger.warning(
+          "Unsafe block file(s) detected in page ID #{page_id}, explanation: #{explanation}"
+        )
+
+        delete_page_and_notify_authors(page_id, event, explanation)
     end
   end
 
@@ -150,16 +154,12 @@ defmodule PiiGuardian.NotionEventHandler do
     end
   end
 
-  defp notify_author(%{"id" => author_id, "type" => "person"}, page_id, explanation) do
-    # In a real system, you would use Notion API to send a message to the user
-    # or perhaps use email notification, Slack integration, etc.
-    # For now, we'll just log this
-    Logger.info(
+  defp notify_author(%{"id" => author_id, "type" => "person"} = author, page_id, explanation) do
+    Logger.debug(
       "Notification sent to author #{author_id} about PII in page #{page_id}: #{explanation}"
     )
 
+    IO.inspect(author, label: "AUTHOR")
     :ok
   end
-
-  defp notify_author(_, _, _), do: :ok
 end
