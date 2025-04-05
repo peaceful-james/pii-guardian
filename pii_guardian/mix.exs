@@ -33,6 +33,7 @@ defmodule PiiGuardian.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:finch, "~> 0.16"},
       {:tesla, "~> 1.14"},
       {:anthropix, "~> 0.6.1"},
       {:oban, "~> 2.19"},

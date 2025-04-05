@@ -13,6 +13,7 @@ defmodule PiiGuardian.Application do
         PiiGuardian.Repo,
         {DNSCluster, query: Application.get_env(:pii_guardian, :dns_cluster_query) || :ignore},
         {Phoenix.PubSub, name: PiiGuardian.PubSub},
+        {Finch, name: PiiGuardian.Finch},
         if(PiiGuardian.env() != :test,
           do: {Slack.Supervisor, Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)}
         ),
