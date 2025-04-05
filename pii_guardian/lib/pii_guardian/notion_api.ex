@@ -109,6 +109,6 @@ defmodule PiiGuardian.NotionApi do
   defp get_error_message(_), do: "Unknown error"
 
   defp notion_token do
-    Application.fetch_env!(:pii_guardian, :notion_token)
+    Application.fetch_env!(:pii_guardian, :notion_api_token)
   end
 end
