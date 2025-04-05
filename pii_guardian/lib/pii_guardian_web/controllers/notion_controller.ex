@@ -8,7 +8,7 @@ defmodule PiiGuardianWeb.NotionController do
   Simply logs the event at info level and returns a successful response.
   """
   def events(conn, params) do
-    Logger.info("Received Notion webhook event: #{inspect(params)}")
+    Logger.info("Received Notion webhook event: #{inspect(params, pretty: true)}")
 
     # Return a 200 OK response to acknowledge receipt
     conn
