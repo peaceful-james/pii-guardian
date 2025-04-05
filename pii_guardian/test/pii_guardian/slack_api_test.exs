@@ -1,8 +1,8 @@
 defmodule PiiGuardian.SlackApiTest do
   use ExUnit.Case, async: true
 
-  import Tesla.Mock
   import ExUnit.CaptureLog
+  import Tesla.Mock
 
   alias PiiGuardian.SlackApi
 

@@ -144,7 +144,10 @@ defmodule PiiGuardian.NotionEventHandlerTest do
         {:ok, %{"channel" => %{"id" => "D12345"}}}
       end)
 
-      # Let the mock SlackApi.post_message be called directly
+      # Mock SlackApi.post_message
+      expect(MockSlackApi, :post_message, fn "D12345", _text ->
+        {:ok, %{"channel" => %{"id" => "D12345"}}}
+      end)
 
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
@@ -246,7 +249,10 @@ defmodule PiiGuardian.NotionEventHandlerTest do
         {:ok, %{"channel" => %{"id" => "D12345"}}}
       end)
 
-      # Let the mock SlackApi.post_message be called directly
+      # Mock SlackApi.post_message
+      expect(MockSlackApi, :post_message, fn "D12345", _text ->
+        {:ok, %{"channel" => %{"id" => "D12345"}}}
+      end)
 
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
@@ -260,11 +266,6 @@ defmodule PiiGuardian.NotionEventHandlerTest do
 
       assert captured_log =~
                ~s(Unsafe block file(s\) detected in page ID fake-page-id-87654321, explanation: No file URL found in block)
-
-      assert captured_log =~
-               ~s(Slack API error: %{"error" => "not_authed", "ok" => false, "response_metadata" => %{"warnings" => ["missing_charset"]}, "warning" => "missing_charset"})
-
-      assert captured_log =~ ~s(Failed to send Slack message: "not_authed")
     end
 
     test "skips archived pages" do
@@ -435,7 +436,10 @@ defmodule PiiGuardian.NotionEventHandlerTest do
         {:ok, %{"channel" => %{"id" => "D12345"}}}
       end)
 
-      # Let the mock SlackApi.post_message be called directly
+      # Mock SlackApi.post_message
+      expect(MockSlackApi, :post_message, fn "D12345", _text ->
+        {:ok, %{"channel" => %{"id" => "D12345"}}}
+      end)
 
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
@@ -776,7 +780,10 @@ defmodule PiiGuardian.NotionEventHandlerTest do
         {:ok, %{"channel" => %{"id" => "D12345"}}}
       end)
 
-      # Let the mock SlackApi.post_message be called directly
+      # Mock SlackApi.post_message
+      expect(MockSlackApi, :post_message, fn "D12345", _text ->
+        {:ok, %{"channel" => %{"id" => "D12345"}}}
+      end)
 
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
@@ -787,14 +794,6 @@ defmodule PiiGuardian.NotionEventHandlerTest do
         end)
 
       assert captured_log =~ ~s(PII detected in newly created page fake-page-id: Found PII)
-
-      assert captured_log =~
-               ~s(Slack API error: %{"error" => "not_authed", "ok" => false, "response_metadata" => %{"warnings" => ["missing_charset"]}, "warning" => "missing_charset"})
-
-      assert captured_log =~ ~s(Failed to send Slack message: "not_authed")
-
-      assert captured_log =~
-               ~s(Failed to notify author via Slack: Failed to send Slack message: "not_authed". Email: author@example.com, Page: fake-page-id)
     end
   end
 end
