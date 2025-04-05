@@ -33,6 +33,7 @@ defmodule PiiGuardian.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:anthropix, "~> 0.6.1"},
       {:oban, "~> 2.19"},
       # {:slack_elixir, "~> 1.2"},
       {:slack_elixir, path: "../../slack_elixir"},
