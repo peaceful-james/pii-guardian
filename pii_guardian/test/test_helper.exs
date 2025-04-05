@@ -10,11 +10,13 @@ Mox.defmock(PiiGuardian.MockAnthropicPiiDetection,
 )
 
 Mox.defmock(PiiGuardian.MockAnthropix, for: PiiGuardian.Mocks.AnthropixBehaviour)
+Mox.defmock(PiiGuardian.MockSlackbot, for: PiiGuardian.Mocks.SlackbotBehaviour)
 
 # Set the application environment to use mock modules in test
 Application.put_env(:pii_guardian, :slack_api, PiiGuardian.MockSlackApi)
 Application.put_env(:pii_guardian, :notion_api, PiiGuardian.MockNotionApi)
 Application.put_env(:pii_guardian, :anthropix, PiiGuardian.MockAnthropix)
+Application.put_env(:pii_guardian, :slackbot, PiiGuardian.MockSlackbot)
 
 # Allow mocks to be called from any process
 # Mox.allow(PiiGuardian.MockSlackApi, self(), :any)

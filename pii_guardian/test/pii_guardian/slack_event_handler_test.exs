@@ -4,8 +4,8 @@ defmodule PiiGuardian.SlackEventHandlerTest do
 
   import Mox
 
-  alias PiiGuardian.MockAnthropicPiiDetection
-  alias PiiGuardian.MockSlackApi
+  alias PiiGuardian.MockAnthropix
+  alias PiiGuardian.MockSlackbot
   alias PiiGuardian.SlackEventHandler
   alias PiiGuardian.SlackEventMocks.Safe
   alias PiiGuardian.SlackEventMocks.Unsafe
@@ -13,10 +13,22 @@ defmodule PiiGuardian.SlackEventHandlerTest do
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
 
+  # Allow mocks to be called from any process
+  setup do
+    # Use global mode to allow expectations to be called from any process
+    Mox.set_mox_global()
+    :ok
+  end
+
   describe "handle/1 for safe messages" do
     test "returns ok for new message" do
-      # Mock the PII detection to return safe
-      expect(MockAnthropicPiiDetection, :detect_pii_in_text, fn _text -> :safe end)
+      # Mock Anthropix for AnthropicPiiDetection.detect_pii_in_text
+      MockAnthropix
+      |> expect(:init, fn _api_key -> %{client: :test_client} end)
+      |> expect(:chat, fn _client, _opts ->
+        {:ok, %{"content" => [%{"text" => "[NO_PII_SAFE] The text is safe."}]}}
+      end)
+
       event = Safe.new_message()
       assert SlackEventHandler.handle(event) == :ok
     end
@@ -24,25 +36,20 @@ defmodule PiiGuardian.SlackEventHandlerTest do
 
   describe "handle/1 for unsafe messages" do
     test "for new message, deletes the message and DMs the author" do
-      # Mock the PII detection to return unsafe
-      expect(MockAnthropicPiiDetection, :detect_pii_in_text, fn _text ->
-        {:unsafe, "This message contains PII: email address detected"}
+      # Mock Anthropix to return an unsafe response
+      MockAnthropix
+      |> expect(:init, fn _api_key -> %{client: :test_client} end)
+      |> expect(:chat, fn _client, _opts ->
+        {:ok,
+         %{
+           "content" => [
+             %{"text" => "[YES_PII_UNSAFE] This message contains PII: email address detected"}
+           ]
+         }}
       end)
 
-      # Mock the Slackbot DM and delete operations
-      MockSlackApi
-      |> expect(:get_user_info, fn _user_id ->
-        {:ok, %{"user" => %{"profile" => %{"real_name" => "Test User"}}}}
-      end)
-      |> expect(:open_dm, fn _user_id ->
-        {:ok, %{"channel" => %{"id" => "D12345678"}}}
-      end)
-      |> expect(:post_message, fn _channel, _text, _opts ->
-        {:ok, %{"ok" => true}}
-      end)
-      |> expect(:delete_message, fn _channel, _ts ->
-        {:ok, %{"ok" => true}}
-      end)
+      # Mock the Slackbot.delete_slack_message_and_dm_author function
+      expect(MockSlackbot, :delete_slack_message_and_dm_author, fn _event, _explanation -> :ok end)
 
       event = Unsafe.new_message()
       assert SlackEventHandler.handle(event) == :ok

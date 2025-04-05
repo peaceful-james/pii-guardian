@@ -31,6 +31,27 @@ defmodule PiiGuardian.Mocks do
     @callback get_file_info(file_id :: String.t()) :: {:ok, map()} | {:error, any()}
   end
 
+  defmodule SlackbotBehaviour do
+    @moduledoc """
+    Behavior for Slackbot module.
+    """
+    @callback delete_slack_message_and_dm_author(
+                event :: map(),
+                explanation :: String.t()
+              ) :: :ok
+    @callback delete_file_and_dm_author(
+                file :: map(),
+                event :: map(),
+                explanation :: String.t()
+              ) :: :ok
+    @callback dm_author_about_notion_pii(
+                email :: String.t(),
+                page_id :: String.t(),
+                page_title :: String.t(),
+                explanation :: String.t()
+              ) :: :ok | {:error, String.t()}
+  end
+
   defmodule NotionApiBehaviour do
     @moduledoc """
     Behavior for NotionApi module.
