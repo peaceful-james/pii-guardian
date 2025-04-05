@@ -1,10 +1,15 @@
 defmodule PiiGuardian.SlackEventHandler do
   @moduledoc """
-    Handles Slack events.
+  Handles Slack events.
   """
+  alias PiiGuardian.Slackbot
+  alias PiiGuardian.SlackPiiDetection
 
   def handle(event) do
-    IO.inspect(event, label: "Received Slack event")
-    :ok
+    if SlackPiiDetection.contains_pii?(event) do
+      Slackbot.delete_slack_message_and_dm_author(event)
+    else
+      :ok
+    end
   end
 end

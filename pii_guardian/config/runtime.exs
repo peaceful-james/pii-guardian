@@ -20,16 +20,19 @@ if System.get_env("PHX_SERVER") do
   config :pii_guardian, PiiGuardianWeb.Endpoint, server: true
 end
 
-get_env_var = if config_env() == :test do
-  fn _name -> "" end
-else
-  &System.fetch_env!/1
-end
+get_env_var =
+  if config_env() == :test do
+    fn _name -> "" end
+  else
+    &System.fetch_env!/1
+  end
 
 config :pii_guardian, PiiGuardian.Slackbot,
   app_token: get_env_var.("PII_GUARDIAN_SLACK_APP_TOKEN"),
   bot_token: get_env_var.("PII_GUARDIAN_SLACK_BOT_TOKEN"),
   bot: PiiGuardian.Slackbot
+
+config :slack_elixir, admin_user_token: get_env_var.("PII_GUARDIAN_SLACK_ADMIN_USER_TOKEN")
 
 config :pii_guardian, PiiGuardianWeb.Plugs.NotionVerificationPlug,
   verification_token: get_env_var.("PII_GUARDIAN_NOTION_VERIFICATION_TOKEN")

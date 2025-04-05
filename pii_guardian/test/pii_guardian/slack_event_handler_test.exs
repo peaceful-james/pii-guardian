@@ -16,7 +16,7 @@ defmodule PiiGuardian.SlackEventHandlerTest do
     test "for new message, creates oban job to delete message and DM author" do
       event = Unsafe.new_message()
       assert SlackEventHandler.handle(event) == :ok
-      flunk "finish"
+      flunk("finish")
     end
   end
 end
