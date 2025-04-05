@@ -25,5 +25,7 @@ config :logger, level: :warning
 
 config :pii_guardian, Oban, testing: :manual
 
+config :tesla, adapter: Tesla.Mock
+
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
