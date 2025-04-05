@@ -72,6 +72,51 @@ defmodule PiiGuardian.NotionApi do
   end
 
   @doc """
+  Retrieve a user by ID
+  https://developers.notion.com/reference/get-user
+  """
+  def get_user(user_id) do
+    "/users/#{user_id}"
+    |> get()
+    |> handle_response()
+  end
+
+  @doc """
+  List all users
+  https://developers.notion.com/reference/get-users
+
+  Optionally takes a pagination cursor and page size.
+  """
+  def list_users(start_cursor \\ nil, page_size \\ 100) do
+    query = [page_size: page_size]
+    query = if start_cursor, do: Keyword.put(query, :start_cursor, start_cursor), else: query
+
+    "/users"
+    |> get(query: query)
+    |> handle_response()
+  end
+
+  @doc """
+  Recursively fetch all users, handling pagination
+  """
+  def get_all_users do
+    get_all_users_recursive(nil, [])
+  end
+
+  defp get_all_users_recursive(start_cursor, acc) do
+    case list_users(start_cursor) do
+      {:ok, %{"results" => results, "has_more" => true, "next_cursor" => next_cursor}} ->
+        get_all_users_recursive(next_cursor, acc ++ results)
+
+      {:ok, %{"results" => results}} ->
+        {:ok, acc ++ results}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  @doc """
   Recursively fetch all blocks for a page, handling pagination
   """
   def get_all_page_content(page_id) do
