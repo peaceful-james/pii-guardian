@@ -21,8 +21,8 @@ defmodule PiiGuardian.DataCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import PiiGuardian.DataCase
       import ExUnit.CaptureLog
+      import PiiGuardian.DataCase
 
       alias PiiGuardian.Repo
     end

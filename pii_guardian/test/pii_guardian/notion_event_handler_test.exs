@@ -251,7 +251,20 @@ defmodule PiiGuardian.NotionEventHandlerTest do
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
 
-      assert NotionEventHandler.handle(event) == :ok
+      captured_log =
+        capture_log([level: :warning], fn ->
+          assert NotionEventHandler.handle(event) == :ok
+        end)
+
+      assert captured_log =~ ~s(No file URL found in block: file-block-id)
+
+      assert captured_log =~
+               ~s(Unsafe block file(s\) detected in page ID fake-page-id-87654321, explanation: No file URL found in block)
+
+      assert captured_log =~
+               ~s(Slack API error: %{"error" => "not_authed", "ok" => false, "response_metadata" => %{"warnings" => ["missing_charset"]}, "warning" => "missing_charset"})
+
+      assert captured_log =~ ~s(Failed to send Slack message: "not_authed")
     end
 
     test "skips archived pages" do
@@ -584,7 +597,13 @@ defmodule PiiGuardian.NotionEventHandlerTest do
 
       # No notification should happen for bot authors
 
-      assert NotionEventHandler.handle(event) == :ok
+      captured_log =
+        capture_log([level: :warning], fn ->
+          assert NotionEventHandler.handle(event) == :ok
+        end)
+
+      assert captured_log =~ "PII detected in newly created page fake-page-id: Found private data"
+      assert captured_log =~ "Author not found or not a person, unable to send notification"
     end
 
     test "handles failure to notify author via Slack" do
@@ -762,7 +781,20 @@ defmodule PiiGuardian.NotionEventHandlerTest do
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
 
-      assert NotionEventHandler.handle(event) == :ok
+      captured_log =
+        capture_log(fn ->
+          assert NotionEventHandler.handle(event) == :ok
+        end)
+
+      assert captured_log =~ ~s(PII detected in newly created page fake-page-id: Found PII)
+
+      assert captured_log =~
+               ~s(Slack API error: %{"error" => "not_authed", "ok" => false, "response_metadata" => %{"warnings" => ["missing_charset"]}, "warning" => "missing_charset"})
+
+      assert captured_log =~ ~s(Failed to send Slack message: "not_authed")
+
+      assert captured_log =~
+               ~s(Failed to notify author via Slack: Failed to send Slack message: "not_authed". Email: author@example.com, Page: fake-page-id)
     end
   end
 end
