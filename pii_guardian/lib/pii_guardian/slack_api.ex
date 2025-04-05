@@ -2,6 +2,9 @@ defmodule PiiGuardian.SlackApi do
   @moduledoc """
   Slack API client for interacting with the Slack API.
   """
+  # Implement the behaviour for mocking in tests
+  @behaviour PiiGuardian.Mocks.SlackApiBehaviour
+
   use Tesla
 
   require Logger

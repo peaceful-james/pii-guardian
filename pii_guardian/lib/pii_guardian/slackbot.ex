@@ -7,10 +7,12 @@ defmodule PiiGuardian.Slackbot do
   """
   use Slack.Bot
 
+  alias PiiGuardian.SlackApi
   alias PiiGuardian.SlackObanWorker
 
   require Logger
 
+  # Use dependency injection in test environment
   @impl Slack.Bot
   def handle_event("message", event, _bot) do
     Logger.debug("Got Slack event: #{inspect(event, pretty: true)}")
@@ -23,7 +25,7 @@ defmodule PiiGuardian.Slackbot do
       ) do
     # Get user information for personalized messaging
     user_info =
-      case PiiGuardian.SlackApi.get_user_info(user_id) do
+      case slack_api().get_user_info(user_id) do
         {:ok, %{"user" => user_data}} -> user_data
         _ -> %{"profile" => %{"real_name" => "there"}}
       end
@@ -69,7 +71,7 @@ defmodule PiiGuardian.Slackbot do
       ) do
     # Get user information for personalized messaging
     user_info =
-      case PiiGuardian.SlackApi.get_user_info(user_id) do
+      case slack_api().get_user_info(user_id) do
         {:ok, %{"user" => user_data}} -> user_data
         _ -> %{"profile" => %{"real_name" => "there"}}
       end
@@ -81,7 +83,7 @@ defmodule PiiGuardian.Slackbot do
     file_name = Map.get(file, "name", "your file")
 
     # Delete the file
-    PiiGuardian.SlackApi.delete_file(file["id"])
+    slack_api().delete_file(file["id"])
 
     dm(channel, user_id, """
     =========================================================================================
@@ -117,14 +119,14 @@ defmodule PiiGuardian.Slackbot do
   """
   def dm_author_about_notion_pii(email, page_id, page_title, explanation) do
     # Look up the Slack user by email
-    case PiiGuardian.SlackApi.lookup_user_by_email(email) do
+    case slack_api().lookup_user_by_email(email) do
       {:ok, %{"user" => user}} ->
         Logger.info("Going to DM notion user with email #{email} on Slack.")
         user_id = user["id"]
         user_name = user["profile"]["real_name"] || user["name"] || "there"
 
         # Open a DM channel with the user
-        case PiiGuardian.SlackApi.open_dm(user_id) do
+        case slack_api().open_dm(user_id) do
           {:ok, %{"channel" => %{"id" => dm_channel_id}}} ->
             # Send the notification message
             message = """
@@ -151,7 +153,7 @@ defmodule PiiGuardian.Slackbot do
             =========================================================================================
             """
 
-            case PiiGuardian.SlackApi.post_message(dm_channel_id, message) do
+            case slack_api().post_message(dm_channel_id, message) do
               {:ok, _} ->
                 Logger.info("Successfully sent Notion PII notification to #{user_name} via Slack")
                 :ok
@@ -171,6 +173,8 @@ defmodule PiiGuardian.Slackbot do
         {:error, "Failed to find Slack user by email: #{inspect(reason)}"}
     end
   end
+
+  defp slack_api, do: Application.get_env(:pii_guardian, :slack_api, SlackApi)
 
   def list_registry_keys do
     Registry.select(Slack.MessageServerRegistry, [{{:"$1", :"$2", :"$3"}, [], [:"$1"]}])
