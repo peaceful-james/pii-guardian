@@ -28,3 +28,10 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - test edited slack comment
 - test new slack attachment
 - test edited slack attachment
+- use CloudCIX for chatbot with corpus
+
+## For dev
+
+Get notion webhooks by using `ngrok http 4000` and update the URL at Notions "My Creator Profile" in "Integrations".
+
+Source the env vars with `source .env`.
