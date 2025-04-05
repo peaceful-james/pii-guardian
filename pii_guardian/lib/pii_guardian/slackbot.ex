@@ -22,6 +22,10 @@ defmodule PiiGuardian.Slackbot do
         explanation
       ) do
     dm(channel, user, """
+    =========================================================================================
+
+
+
     Hi there!
 
     I just wanted to let you know that I deleted your message in the channel because it contained sensitive information.
@@ -35,6 +39,10 @@ defmodule PiiGuardian.Slackbot do
     > #{explanation}
 
     Please be careful about sharing personal information in public channels.
+
+
+
+    =========================================================================================
     """)
 
     delete_message(channel, ts)
@@ -48,6 +56,10 @@ defmodule PiiGuardian.Slackbot do
     PiiGuardian.SlackApi.delete_file(file["id"])
 
     dm(channel, user, """
+    =========================================================================================
+
+
+
     Hi there!
 
     I just wanted to let you know that I deleted your file because it contained sensitive information.
@@ -57,6 +69,10 @@ defmodule PiiGuardian.Slackbot do
     > #{explanation}
 
     Please be careful about sharing personal information in public channels.
+
+
+
+    =========================================================================================
     """)
   end
 
