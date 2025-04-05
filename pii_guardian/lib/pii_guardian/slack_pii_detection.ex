@@ -21,7 +21,7 @@ defmodule PiiGuardian.SlackPiiDetection do
          {:ok, %{"file" => %{"filetype" => filetype, "mimetype" => mimetype}} = result} <-
            SlackApi.get_file_info(file_id) do
       Logger.debug(
-        "File content retrieved successfully for file ID #{file_id}: #{inspect(result)}"
+        "File content retrieved successfully for file ID #{file_id}: #{inspect(result, pretty: true)}"
       )
 
       AnthropicPiiDetection.detect_pii_in_file(raw_body, filetype, mimetype)

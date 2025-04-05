@@ -52,8 +52,9 @@ config :pii_guardian, PiiGuardianWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :pii_guardian, dev_routes: true
 
+config :logger, :console, level: :info
 # Do not include metadata nor timestamps in development logs
-config :logger, :default_formatter, format: "[$level] $message\n", level: :debug
+config :logger, :default_formatter, format: "[$level] $message\n"
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.

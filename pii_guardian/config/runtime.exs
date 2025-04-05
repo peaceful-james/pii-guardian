@@ -37,6 +37,9 @@ config :slack_elixir, admin_user_token: get_env_var.("PII_GUARDIAN_SLACK_ADMIN_U
 config :pii_guardian, PiiGuardianWeb.Plugs.NotionVerificationPlug,
   verification_token: get_env_var.("PII_GUARDIAN_NOTION_VERIFICATION_TOKEN")
 
+# Set the Notion token from environment variable
+config :pii_guardian, :notion_api_token, get_env_var.("PII_GUARDIAN_NOTION_API_TOKEN")
+
 if config_env() == :prod do
   import_config "runtime_prod.exs"
 end

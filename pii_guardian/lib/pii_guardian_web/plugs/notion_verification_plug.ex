@@ -30,8 +30,8 @@ defmodule PiiGuardianWeb.Plugs.NotionVerificationPlug do
 
   defp halt_with_unauthorized(conn) do
     conn
-    # |> put_resp_content_type("application/json")
-    # |> send_resp(401, JSON.encode!(%{error: "Unauthorized"}))
-    # |> halt()
+    |> put_resp_content_type("application/json")
+    |> send_resp(401, Jason.encode!(%{error: "Unauthorized"}))
+    |> halt()
   end
 end
