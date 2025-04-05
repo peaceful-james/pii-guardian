@@ -152,7 +152,7 @@ defmodule PiiGuardian.NotionEventHandler do
     end
   end
 
-  defp notify_author(%{"id" => author_id, "type" => "person"} = author, page_id, explanation) do
+  defp notify_author(%{"id" => author_id, "type" => "person"}, page_id, explanation) do
     email =
       case NotionApi.get_user(author_id) do
         {:ok, user} -> get_user_email(user)

@@ -18,15 +18,25 @@ defmodule PiiGuardian.Slackbot do
   end
 
   def delete_slack_message_and_dm_author(
-        %{"channel" => channel, "text" => text, "ts" => ts, "user" => user} = _event,
+        %{"channel" => channel, "text" => text, "ts" => ts, "user" => user_id} = _event,
         explanation
       ) do
-    dm(channel, user, """
+    # Get user information for personalized messaging
+    user_info =
+      case PiiGuardian.SlackApi.get_user_info(user_id) do
+        {:ok, %{"user" => user_data}} -> user_data
+        _ -> %{"profile" => %{"real_name" => "there"}}
+      end
+
+    # Get user's name for personalized greeting
+    user_name = user_info["profile"]["real_name"] || user_info["name"] || "there"
+
+    dm(channel, user_id, """
     =========================================================================================
 
 
 
-    Hi there!
+    Hi #{user_name}!
 
     I just wanted to let you know that I deleted your message in the channel because it contained sensitive information.
 
@@ -54,19 +64,33 @@ defmodule PiiGuardian.Slackbot do
 
   def delete_file_and_dm_author(
         file,
-        %{"channel" => channel, "user" => user} = _event,
+        %{"channel" => channel, "user" => user_id} = _event,
         explanation
       ) do
+    # Get user information for personalized messaging
+    user_info =
+      case PiiGuardian.SlackApi.get_user_info(user_id) do
+        {:ok, %{"user" => user_data}} -> user_data
+        _ -> %{"profile" => %{"real_name" => "there"}}
+      end
+
+    # Get user's name for personalized greeting
+    user_name = user_info["profile"]["real_name"] || user_info["name"] || "there"
+
+    # Get file name if available
+    file_name = Map.get(file, "name", "your file")
+
+    # Delete the file
     PiiGuardian.SlackApi.delete_file(file["id"])
 
-    dm(channel, user, """
+    dm(channel, user_id, """
     =========================================================================================
 
 
 
-    Hi there!
+    Hi #{user_name}!
 
-    I just wanted to let you know that I deleted your file because it contained sensitive information.
+    I just wanted to let you know that I deleted your file "#{file_name}" because it contained sensitive information.
 
     Here is the reason why I deleted it:
 
@@ -74,7 +98,7 @@ defmodule PiiGuardian.Slackbot do
     #{explanation}
     ```
 
-    Please be careful about sharing personal information in public channels.
+    Please be careful about sharing files containing personal information in public channels.
 
 
 
