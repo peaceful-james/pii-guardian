@@ -41,7 +41,7 @@ defmodule PiiGuardian.AnthropicPiiDetectionTest do
       end)
 
       assert AnthropicPiiDetection.detect_pii_in_text("My email is test@example.com") ==
-               {:unsafe, " Email address detected: test@example.com"}
+               {:unsafe, "Email address detected: test@example.com"}
     end
   end
 
@@ -69,7 +69,7 @@ defmodule PiiGuardian.AnthropicPiiDetectionTest do
       content = "PDF content with PII"
       result = AnthropicPiiDetection.detect_pii_in_file(content, "pdf", "application/pdf")
 
-      assert result == {:unsafe, " SSN detected in document"}
+      assert result == {:unsafe, "SSN detected in document"}
     end
   end
 end

@@ -21,6 +21,9 @@ defmodule PiiGuardian.Mocks do
     @callback open_dm(user_id :: String.t()) :: {:ok, map()} | {:error, any()}
     @callback post_message(channel :: String.t(), text :: String.t(), opts :: map()) ::
                 {:ok, map()} | {:error, any()}
+    # Add a function head for the 2-parameter version as well
+    @callback post_message(channel :: String.t(), text :: String.t()) ::
+                {:ok, map()} | {:error, any()}
     @callback delete_message(channel :: String.t(), ts :: String.t()) ::
                 {:ok, map()} | {:error, any()}
     @callback delete_file(file_id :: String.t()) :: {:ok, map()} | {:error, any()}

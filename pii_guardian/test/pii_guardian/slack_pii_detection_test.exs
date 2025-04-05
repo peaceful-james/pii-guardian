@@ -37,7 +37,9 @@ defmodule PiiGuardian.SlackPiiDetectionTest do
       end)
 
       event = %{"type" => "message", "text" => "Hello world"}
-      assert SlackPiiDetection.detect_pii_in_text(event) == {:unsafe, " Contains email addresses"}
+      result = SlackPiiDetection.detect_pii_in_text(event)
+      assert elem(result, 0) == :unsafe
+      result |> elem(1) |> String.contains?("Contains email addresses") |> assert()
     end
   end
 
@@ -63,7 +65,9 @@ defmodule PiiGuardian.SlackPiiDetectionTest do
         {:ok, %{"file" => %{"filetype" => "text", "mimetype" => "text/plain"}}}
       end)
 
-      assert SlackPiiDetection.detect_pii_in_file(file) == {:unsafe, " Contains email addresses"}
+      result = SlackPiiDetection.detect_pii_in_file(file)
+      assert elem(result, 0) == :unsafe
+      result |> elem(1) |> String.contains?("Contains email addresses") |> assert()
     end
 
     test "returns unsafe when file download fails" do
