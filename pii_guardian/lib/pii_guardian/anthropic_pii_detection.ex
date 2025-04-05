@@ -36,7 +36,7 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
     init_client()
     |> Anthropix.chat(chat_opts)
-    |> tap(&Logger.debug("Anthropic API response for text: #{inspect(&1)}"))
+    |> tap(&Logger.debug("Anthropic API response for text: #{inspect(&1, pretty: true)}")))
     |> parse_response()
   end
 
@@ -67,7 +67,7 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
     init_client()
     |> Anthropix.chat(chat_opts)
-    |> tap(&Logger.debug("Anthropic API response for file: #{inspect(&1)}"))
+    |> tap(&Logger.debug("Anthropic API response for file: #{inspect(&1, pretty: true)}")))
     |> parse_response()
   end
 

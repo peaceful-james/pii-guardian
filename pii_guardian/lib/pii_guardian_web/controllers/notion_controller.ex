@@ -11,7 +11,7 @@ defmodule PiiGuardianWeb.NotionController do
   similar to how PiiGuardian.Slackbot handles events.
   """
   def events(conn, params) do
-    Logger.info("Received Notion webhook event: #{inspect(params)}")
+    Logger.debug("Received Notion webhook event: #{inspect(params, pretty: true)}")
 
     case NotionObanWorker.enqueue_event_to_handle(params) do
       {:ok, _job} ->

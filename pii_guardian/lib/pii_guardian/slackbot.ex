@@ -13,7 +13,7 @@ defmodule PiiGuardian.Slackbot do
 
   @impl Slack.Bot
   def handle_event("message", event, _bot) do
-    Logger.debug("Got Slack event: #{inspect(event)}")
+    Logger.debug("Got Slack event: #{inspect(event, pretty: true)}")
     SlackObanWorker.enqueue_event_to_handle(event)
   end
 
