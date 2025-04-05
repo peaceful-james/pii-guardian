@@ -5,7 +5,7 @@ defmodule PiiGuardian.NotionApi do
   Provides functions to retrieve page content and delete pages.
   """
   # Implement the behaviour for mocking in tests
-  @behaviour PiiGuardian.Mocks.NotionApiBehaviour
+  @behaviour PiiGuardian.NotionApiBehaviour
 
   use Tesla
 

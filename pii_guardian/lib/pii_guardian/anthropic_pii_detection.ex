@@ -3,7 +3,7 @@ defmodule PiiGuardian.AnthropicPiiDetection do
   Detect if a text or PDF contains PII (Personally Identifiable Information) using the Anthropic's API.
   """
   # Implement the behaviour for mocking in tests
-  @behaviour PiiGuardian.Mocks.AnthropicPiiDetectionBehaviour
+  @behaviour PiiGuardian.AnthropicPiiDetectionBehaviour
 
   # Use dependency injection in test environment
 
