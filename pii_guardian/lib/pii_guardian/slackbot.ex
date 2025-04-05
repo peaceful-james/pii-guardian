@@ -7,8 +7,8 @@ defmodule PiiGuardian.Slackbot do
   """
   use Slack.Bot
 
-  alias PiiGuardian.SlackObanWorker
   alias PiiGuardian.SlackApi
+  alias PiiGuardian.SlackObanWorker
 
   require Logger
 
