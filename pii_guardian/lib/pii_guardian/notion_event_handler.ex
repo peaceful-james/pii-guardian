@@ -112,22 +112,8 @@ defmodule PiiGuardian.NotionEventHandler do
         Logger.info("No PII detected in any of the updated blocks on page #{page_id}")
         :ok
 
-      [{:unsafe, ^page_id, explanation} | _] when is_binary(explanation) ->
-        Logger.warning("PII detected in newly created page #{page_id}: #{explanation}")
-        # Archive the page with PII
-        delete_page_and_notify_authors(page_id, event, explanation)
-
-      [{:unsafe, ^page_id, unsafe_block_file_results} | _]
-      when is_list(unsafe_block_file_results) ->
-        explanation =
-          Enum.map_join(unsafe_block_file_results, "\n\n", fn %{explanation: explanation} ->
-            explanation
-          end)
-
-        Logger.warning(
-          "Unsafe block file(s) detected in page ID #{page_id}, explanation: #{explanation}"
-        )
-
+      [{block_id, {:unsafe, _block_id, explanation}} | _] when is_binary(explanation) ->
+        Logger.warning("PII detected in page #{page_id} in block #{block_id}: #{explanation}")
         delete_page_and_notify_authors(page_id, event, explanation)
     end
   end
