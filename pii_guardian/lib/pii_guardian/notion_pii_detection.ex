@@ -15,7 +15,7 @@ defmodule PiiGuardian.NotionPiiDetection do
   def detect_pii_in_page(page_id) when is_binary(page_id) do
     Logger.debug("Checking Notion page for PII: #{page_id}")
 
-    case page_id |> NotionApi.get_all_page_content() do
+    case NotionApi.get_all_page_content(page_id) do
       {:ok, blocks} ->
         Logger.debug("Retrieved blocks for page ID: #{page_id}")
         check_blocks_for_pii(blocks, page_id)
@@ -93,13 +93,21 @@ defmodule PiiGuardian.NotionPiiDetection do
       :safe
     else
       # Check each file block for PII
-      Enum.reduce_while(file_blocks, :safe, fn %{"id" => block_id} = block, _acc ->
-        Logger.info("Checking Notion file block for PII: #{block_id}")
-        case check_file_in_block(block) do
-          :safe -> {:cont, :safe}
-          {:unsafe, _, explanation} -> {:halt, {:unsafe, page_id, explanation}}
-        end
-      end)
+      unsafe_file_block_results =
+        Enum.reduce(file_blocks, [], fn %{"id" => block_id} = block, acc ->
+          Logger.info("Checking Notion file block for PII: #{block_id}")
+
+          case check_file_in_block(block) do
+            :safe -> acc
+            {:unsafe, _, explanation} -> [%{block_id: block_id, explanation: explanation} | acc]
+          end
+        end)
+
+      if Enum.empty?(unsafe_file_block_results) do
+        :safe
+      else
+        {:unsafe, page_id, unsafe_file_block_results}
+      end
     end
   end
 
