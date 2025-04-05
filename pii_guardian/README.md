@@ -29,6 +29,7 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - test new slack attachment
 - test edited slack attachment
 - use CloudCIX for chatbot with corpus
+- switch the `slack_elixir` dep from path to my fork on github
 
 ## For dev
 
