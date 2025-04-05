@@ -153,40 +153,24 @@ defmodule PiiGuardian.NotionEventHandler do
   end
 
   defp notify_author(%{"id" => author_id, "type" => "person"} = author, page_id, explanation) do
-    # Get the user details to include in the notification
-    user_details =
+    email =
       case NotionApi.get_user(author_id) do
-        {:ok, user} ->
-          name = get_user_name(user)
-          email = get_user_email(user)
-          %{name: name, email: email}
-
-        {:error, _} ->
-          %{name: "Unknown User", email: nil}
+        {:ok, user} -> get_user_email(user)
+        {:error, _} -> nil
       end
 
-    # In a real system, you would use Notion API to send a message to the user
-    # or perhaps use email notification, Slack integration, etc.
-    # For now, we'll just log this with improved user information
-    Logger.info(
-      "Notification sent to author #{user_details.name} (#{author_id}) " <>
-        "#{if user_details.email, do: "with email #{user_details.email} ", else: ""}" <>
-        "about PII in page #{page_id}: #{explanation}"
-    )
-
-    # For debugging
-    Logger.debug("Original author data: #{inspect(author, pretty: true)}")
-
-    :ok
+    if email do
+      Logger.info(
+        "Notification sent to author (#{author_id}) with email #{email} about PII in page #{page_id}: #{explanation}"
+      )
+    else
+      Logger.warning("No email found for author #{author_id}, unable to send notification")
+    end
   end
 
-  # Extract user's name from their profile data
-  defp get_user_name(%{"name" => name}) when is_binary(name) and name != "", do: name
-
-  defp get_user_name(%{"person" => %{"name" => name}}) when is_binary(name) and name != "",
-    do: name
-
-  defp get_user_name(_), do: "Unnamed User"
+  defp notify_author(_, _, _) do
+    Logger.warning("Author not found or not a person, unable to send notification")
+  end
 
   # Extract user's email from their profile data
   defp get_user_email(%{"person" => %{"email" => email}}) when is_binary(email) and email != "",
