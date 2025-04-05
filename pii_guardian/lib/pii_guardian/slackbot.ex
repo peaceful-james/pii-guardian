@@ -32,11 +32,15 @@ defmodule PiiGuardian.Slackbot do
 
     Here is what you wrote:
 
-    > #{text}
+    ```
+    #{text}
+    ```
 
     Here is the reason why I deleted it:
 
-    > #{explanation}
+    ```
+    #{explanation}
+    ```
 
     Please be careful about sharing personal information in public channels.
 
@@ -66,7 +70,9 @@ defmodule PiiGuardian.Slackbot do
 
     Here is the reason why I deleted it:
 
-    > #{explanation}
+    ```
+    #{explanation}
+    ```
 
     Please be careful about sharing personal information in public channels.
 
