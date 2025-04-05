@@ -15,9 +15,8 @@ defmodule PiiGuardian.Slackbot do
   end
 
   def delete_slack_message_and_dm_author(
-        %{"channel" => channel, "text" => text, "ts" => ts, "user" => user} = event
+        %{"channel" => channel, "text" => text, "ts" => ts, "user" => user} = _event
       ) do
-
     dm(channel, user, """
     Hi there!
 
