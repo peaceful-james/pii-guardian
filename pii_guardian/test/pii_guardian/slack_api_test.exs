@@ -62,7 +62,7 @@ defmodule PiiGuardian.SlackApiTest do
           assert error == "file_not_found"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(Slack API error: %{\"error\" => \"file_not_found\")
     end
 
     test "returns error when HTTP request fails" do
@@ -82,7 +82,7 @@ defmodule PiiGuardian.SlackApiTest do
           assert error =~ "HTTP error 404"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(GET https://slack.com/api/files.info -> 404)
     end
 
     test "returns error when client error occurs" do
@@ -99,7 +99,7 @@ defmodule PiiGuardian.SlackApiTest do
           assert error =~ "Client error: :timeout"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(GET https://slack.com/api/files.info -> error: :timeout)
     end
   end
 
@@ -108,11 +108,13 @@ defmodule PiiGuardian.SlackApiTest do
       channel = "C12345"
       ts = "1234567890.123456"
 
+      encoded_body = Jason.encode!(%{channel: channel, ts: ts})
+
       mock(fn
         %{
           method: :post,
           url: "https://slack.com/api/chat.delete",
-          body: %{channel: ^channel, ts: ^ts}
+          body: ^encoded_body
         } ->
           build_json_env(%{
             "ok" => true,
@@ -131,11 +133,13 @@ defmodule PiiGuardian.SlackApiTest do
       channel = "C12345"
       ts = "invalid"
 
+      encoded_body = Jason.encode!(%{channel: channel, ts: ts})
+
       mock(fn
         %{
           method: :post,
           url: "https://slack.com/api/chat.delete",
-          body: %{channel: ^channel, ts: ^ts}
+          body: ^encoded_body
         } ->
           build_json_env(%{
             "ok" => false,
@@ -149,7 +153,7 @@ defmodule PiiGuardian.SlackApiTest do
           assert error == "message_not_found"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(Slack API error: %{\"error\" => \"message_not_found\")
     end
   end
 
@@ -158,11 +162,13 @@ defmodule PiiGuardian.SlackApiTest do
       channel = "C12345"
       text = "Hello world"
 
+      encoded_body = Jason.encode!(%{channel: channel, text: text})
+
       mock(fn
         %{
           method: :post,
           url: "https://slack.com/api/chat.postMessage",
-          body: %{channel: ^channel, text: ^text}
+          body: ^encoded_body
         } ->
           build_json_env(%{
             "ok" => true,
@@ -207,12 +213,13 @@ defmodule PiiGuardian.SlackApiTest do
     test "returns error when post fails" do
       channel = "INVALID"
       text = "Hello world"
+      encoded_body = JSON.encode!(%{channel: channel, text: text})
 
       mock(fn
         %{
           method: :post,
           url: "https://slack.com/api/chat.postMessage",
-          body: %{channel: ^channel, text: ^text}
+          body: ^encoded_body
         } ->
           build_json_env(%{
             "ok" => false,
@@ -226,19 +233,20 @@ defmodule PiiGuardian.SlackApiTest do
           assert error == "channel_not_found"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(Slack API error: %{\"error\" => \"channel_not_found\")
     end
   end
 
   describe "open_dm/1" do
     test "opens a DM channel successfully" do
       user_id = "U12345"
+      encoded_body = JSON.encode!(%{users: user_id})
 
       mock(fn
         %{
           method: :post,
           url: "https://slack.com/api/conversations.open",
-          body: %{users: ^user_id}
+          body: ^encoded_body
         } ->
           build_json_env(%{
             "ok" => true,
@@ -284,9 +292,10 @@ defmodule PiiGuardian.SlackApiTest do
   describe "delete_file/1" do
     test "deletes a file successfully" do
       file_id = "F12345"
+      encoded_body = JSON.encode!(%{file: file_id})
 
       mock(fn
-        %{method: :post, url: "https://slack.com/api/files.delete", body: %{file: ^file_id}} ->
+        %{method: :post, url: "https://slack.com/api/files.delete", body: ^encoded_body} ->
           build_json_env(%{
             "ok" => true
           })
@@ -298,9 +307,10 @@ defmodule PiiGuardian.SlackApiTest do
 
     test "returns error when delete_file fails" do
       file_id = "INVALID"
+      encoded_body = JSON.encode!(%{file: file_id})
 
       mock(fn
-        %{method: :post, url: "https://slack.com/api/files.delete", body: %{file: ^file_id}} ->
+        %{method: :post, url: "https://slack.com/api/files.delete", body: ^encoded_body} ->
           build_json_env(%{
             "ok" => false,
             "error" => "file_not_found"
@@ -313,7 +323,7 @@ defmodule PiiGuardian.SlackApiTest do
           assert error == "file_not_found"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(Slack API error: %{\"error\" => \"file_not_found\")
     end
   end
 
@@ -358,7 +368,7 @@ defmodule PiiGuardian.SlackApiTest do
           assert error == "users_not_found"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(Slack API error: %{\"error\" => \"users_not_found\", \"ok\" => false})
     end
   end
 
@@ -403,7 +413,7 @@ defmodule PiiGuardian.SlackApiTest do
           assert error == "user_not_found"
         end)
 
-      assert log =~ "TODO_FOR_DEV"
+      assert log =~ ~s(Slack API error: %{\"error\" => \"user_not_found\")
     end
   end
 

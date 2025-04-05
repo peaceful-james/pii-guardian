@@ -97,11 +97,15 @@ defmodule PiiGuardian.SlackApi do
   Download a file from Slack
   """
   def download_file(url) do
-    [
-      {Tesla.Middleware.Headers, [{"authorization", "Bearer #{admin_token()}"}]}
-    ]
-    |> Tesla.client()
-    |> Tesla.get(url)
+    case [
+           {Tesla.Middleware.Headers, [{"authorization", "Bearer #{admin_token()}"}]}
+         ]
+         |> Tesla.client()
+         |> Tesla.get(url) do
+      {:ok, %{status: status} = env} when status in [200, 201] -> {:ok, env}
+      {:ok, %{status: status} = env} when status not in [200, 201] -> {:error, env}
+      {:error, error} -> {:error, error}
+    end
   end
 
   defp handle_response({:ok, %{status: status, body: body}}) when status in 200..299 do
