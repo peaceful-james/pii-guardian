@@ -30,6 +30,8 @@ config :logger, :default_formatter,
 
 config :phoenix, :json_library, JSON
 
+config :tesla, :adapter, {Tesla.Adapter.Finch, name: PiiGuardian.Finch}
+
 seven_days_s = 60 * 60 * 24 * 7
 
 config :pii_guardian, Oban,
