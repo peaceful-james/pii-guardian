@@ -29,6 +29,8 @@ defmodule PiiGuardian.NotionEventHandler do
     end
   end
 
+  defp notion_api, do: Application.get_env(:pii_guardian, :notion_api, NotionApi)
+
   defp handle_page_created(event) do
     %{
       "entity" => %{"id" => page_id},
@@ -37,7 +39,7 @@ defmodule PiiGuardian.NotionEventHandler do
 
     Logger.info("Page created in workspace #{workspace_name} with ID: #{page_id}")
 
-    case NotionApi.get_page(page_id) do
+    case notion_api().get_page(page_id) do
       {:ok, %{"archived" => false}} ->
         check_entire_page_for_pii(page_id, event)
 
@@ -64,7 +66,7 @@ defmodule PiiGuardian.NotionEventHandler do
       "data" => data
     } = event
 
-    case NotionApi.get_page(page_id) do
+    case notion_api().get_page(page_id) do
       {:ok, %{"archived" => false}} ->
         updated_blocks = Map.get(data, "updated_blocks", [])
         updated_blocks_count = length(updated_blocks)
@@ -135,7 +137,7 @@ defmodule PiiGuardian.NotionEventHandler do
     authors = Map.get(event, "authors", [])
 
     # Archive (delete) the page
-    case NotionApi.delete_page(page_id) do
+    case notion_api().delete_page(page_id) do
       {:ok, _} ->
         Logger.info("Successfully archived page #{page_id} containing PII")
 
@@ -155,14 +157,14 @@ defmodule PiiGuardian.NotionEventHandler do
   defp notify_author(%{"id" => author_id, "type" => "person"}, page_id, explanation) do
     # Get the author's email from Notion
     email =
-      case NotionApi.get_user(author_id) do
+      case notion_api().get_user(author_id) do
         {:ok, user} -> get_user_email(user)
         {:error, _} -> nil
       end
 
     # Get the page title if possible
     page_title =
-      case NotionApi.get_page(page_id) do
+      case notion_api().get_page(page_id) do
         {:ok, page} ->
           get_page_title(page) || "Notion Page"
 

@@ -22,6 +22,8 @@ defmodule PiiGuardianWeb.ConnCase do
       # The default endpoint for testing
       use PiiGuardianWeb, :verified_routes
 
+      import ExUnit.CaptureLog
+
       # Import conveniences for testing with connections
       import Phoenix.ConnTest
       import PiiGuardianWeb.ConnCase

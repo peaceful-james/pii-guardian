@@ -2,6 +2,10 @@ defmodule PiiGuardian.AnthropicPiiDetection do
   @moduledoc """
   Detect if a text or PDF contains PII (Personally Identifiable Information) using the Anthropic's API.
   """
+  # Implement the behaviour for mocking in tests
+  @behaviour PiiGuardian.Mocks.AnthropicPiiDetectionBehaviour
+
+  # Use dependency injection in test environment
 
   require Logger
 
@@ -13,12 +17,16 @@ defmodule PiiGuardian.AnthropicPiiDetection do
   @consistent_format_prompt "Please begin your response with '#{@unsafe_response_prefix}' or '#{@safe_response_prefix}', according with whether or not PII is detected."
 
   defp api_key do
-    System.get_env("PII_GUARDIAN_ANTHROPIC_API_KEY") ||
-      raise "Please set the ANTHROPIC_API_KEY environment variable"
+    Application.fetch_env!(:pii_guardian, :anthropic_api_key)
   end
 
   defp init_client do
-    Anthropix.init(api_key())
+    anthropix().init(api_key())
+  end
+
+  # Helper function to get the appropriate module
+  defp anthropix do
+    Application.get_env(:pii_guardian, :anthropix)
   end
 
   @spec detect_pii_in_text(String.t() | nil) :: result
@@ -34,8 +42,10 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
     chat_opts = [messages: messages, model: "claude-3-5-sonnet-20241022"]
 
-    init_client()
-    |> Anthropix.chat(chat_opts)
+    client = init_client()
+
+    client
+    |> anthropix().chat(chat_opts)
     |> tap(&Logger.debug("Anthropic API response for text: #{inspect(&1, pretty: true)}"))
     |> parse_response()
   end
@@ -65,8 +75,10 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
     chat_opts = [messages: messages, model: "claude-3-5-sonnet-20241022"]
 
-    init_client()
-    |> Anthropix.chat(chat_opts)
+    client = init_client()
+
+    client
+    |> anthropix().chat(chat_opts)
     |> tap(&Logger.debug("Anthropic API response for file: #{inspect(&1, pretty: true)}"))
     |> parse_response()
   end
@@ -74,7 +86,7 @@ defmodule PiiGuardian.AnthropicPiiDetection do
   defp parse_response({:ok, %{"content" => [%{"text" => response_text}]}}) do
     case response_text do
       @safe_response_prefix <> _ -> :safe
-      @unsafe_response_prefix <> explanation -> {:unsafe, explanation}
+      @unsafe_response_prefix <> explanation -> {:unsafe, String.trim(explanation)}
     end
   end
 end
