@@ -37,7 +37,13 @@ defmodule PiiGuardian.NotionEventHandler do
 
     Logger.info("Page created in workspace #{workspace_name} with ID: #{page_id}")
 
-    check_entire_page_for_pii(page_id, event)
+    case NotionApi.get_page(page_id) do
+      {:ok, %{"archived" => false}} ->
+        check_entire_page_for_pii(page_id, event)
+
+      {:ok, %{"archived" => true}} ->
+        Logger.info("Page ID: #{page_id} is archived, skipping PII check.")
+    end
   end
 
   defp handle_page_deleted(event) do
@@ -58,18 +64,24 @@ defmodule PiiGuardian.NotionEventHandler do
       "data" => data
     } = event
 
-    updated_blocks = Map.get(data, "updated_blocks", [])
-    updated_blocks_count = length(updated_blocks)
+    case NotionApi.get_page(page_id) do
+      {:ok, %{"archived" => false}} ->
+        updated_blocks = Map.get(data, "updated_blocks", [])
+        updated_blocks_count = length(updated_blocks)
 
-    Logger.info(
-      "Page updated in workspace #{workspace_name} with ID: #{page_id}, #{updated_blocks_count} blocks updated"
-    )
+        Logger.info(
+          "Page updated in workspace #{workspace_name} with ID: #{page_id}, #{updated_blocks_count} blocks updated"
+        )
 
-    if updated_blocks_count > 0 do
-      # Check individual updated blocks for PII
-      check_blocks_for_pii(updated_blocks, page_id, event)
-    else
-      check_entire_page_for_pii(page_id, event)
+        if updated_blocks_count > 0 do
+          # Check individual updated blocks for PII
+          check_blocks_for_pii(updated_blocks, page_id, event)
+        else
+          check_entire_page_for_pii(page_id, event)
+        end
+
+      {:ok, %{"archived" => true}} ->
+        Logger.info("Page ID: #{page_id} is archived, skipping PII check.")
     end
   end
 

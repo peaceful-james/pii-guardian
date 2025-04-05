@@ -15,14 +15,10 @@ defmodule PiiGuardian.NotionPiiDetection do
   def detect_pii_in_page(page_id) when is_binary(page_id) do
     Logger.debug("Checking Notion page for PII: #{page_id}")
 
-    with {:ok, %{"archived" => false}} <- NotionApi.get_page(page_id),
-         {:ok, blocks} <- NotionApi.get_all_page_content(page_id) do
-      Logger.debug("Retrieved blocks for page ID: #{page_id}")
-      check_blocks_for_pii(blocks, page_id)
-    else
-      {:ok, %{"archived" => true}} ->
-        Logger.info("Page ID: #{page_id} is archived, skipping PII check.")
-        :safe
+    case NotionApi.get_all_page_content(page_id) do
+      {:ok, blocks} ->
+        Logger.debug("Retrieved blocks for page ID: #{page_id}")
+        check_blocks_for_pii(blocks, page_id)
 
       {:error, reason} ->
         Logger.error("Failed to retrieve content for page ID: #{page_id}, reason: #{reason}")
