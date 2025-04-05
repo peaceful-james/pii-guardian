@@ -10,10 +10,17 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
   @consistent_format_prompt "Please begin your response with '#{@unsafe_response_prefix}' or '#{@safe_response_prefix}', according with whether or not PII is detected."
 
+  defp api_key do
+    System.get_env("PII_GUARDIAN_ANTHROPIC_API_KEY") ||
+      raise "Please set the ANTHROPIC_API_KEY environment variable"
+  end
+
+  defp init_client do
+    Anthropix.init(api_key())
+  end
+
   @spec detect_pii_in_text(String.t()) :: result
   def detect_pii_in_text(text) when is_binary(text) do
-    client = "ANTHROPIC_API_KEY" |> System.get_env() |> Anthropix.init()
-
     messages = [
       %{role: "user", content: text},
       %{role: "user", content: "Does this text contain PII?"},
@@ -22,27 +29,36 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
     chat_opts = [messages: messages, model: "claude-3-5-sonnet-20241022"]
 
-    client
+    init_client()
     |> Anthropix.chat(chat_opts)
     |> parse_response()
   end
 
-  def detect_pii_in_pdf(pdf_file_path) do
-    pdf = pdf_file_path |> File.read!() |> Base.encode64()
+  def detect_pii_in_file(content, filetype, mimetype) do
+    content =
+      case filetype do
+        "text" ->
+          %{type: "text", text: content}
 
-    client = "ANTHROPIC_API_KEY" |> System.get_env() |> Anthropix.init()
+        filetype ->
+          source = %{type: "base64", media_type: mimetype, data: Base.encode64(content)}
+          %{type: filetype, source: source}
+      end
 
     messages = [
       %{
         role: "user",
-        content: [
-          %{type: "document", source: %{type: "base64", media_type: "application/pdf", data: pdf}}
-        ]
+        content: [content]
       },
-      %{role: "user", content: "Does this PDF contain PII?"}
+      %{role: "user", content: "Does this file contain PII?"},
+      %{role: "user", content: @consistent_format_prompt}
     ]
 
-    Anthropix.chat(client, messages: messages, model: "claude-3-5-sonnet-20241022")
+    chat_opts = [messages: messages, model: "claude-3-5-sonnet-20241022"]
+
+    init_client()
+    |> Anthropix.chat(chat_opts)
+    |> parse_response()
   end
 
   defp parse_response({:ok, %{"content" => [%{"text" => response_text}]}}) do

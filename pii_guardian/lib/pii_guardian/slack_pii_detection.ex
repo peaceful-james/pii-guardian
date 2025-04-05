@@ -3,6 +3,7 @@ defmodule PiiGuardian.SlackPiiDetection do
   Detect if a Slack event contains PII (Personally Identifiable Information).
   """
   alias PiiGuardian.AnthropicPiiDetection
+  alias PiiGuardian.SlackApi
   alias PiiGuardian.Slackbot
 
   @doc """
@@ -12,9 +13,13 @@ defmodule PiiGuardian.SlackPiiDetection do
     AnthropicPiiDetection.detect_pii_in_text(text)
   end
 
-  def detect_pii_in_file(%{"url_private" => url_private}) do
-    url_private
-    |> Slackbot.read_file!()
-    |> AnthropicPiiDetection.detect_pii_in_pdf()
+  def detect_pii_in_file(%{"id" => file_id}) do
+    case SlackApi.get_file_info(file_id) do
+      {:ok, %{"content" => content, "file" => %{"filetype" => filetype, "mimetype" => mimetype}}} ->
+        AnthropicPiiDetection.detect_pii_in_file(content, filetype, mimetype)
+
+      {:error, reason} ->
+        {:unsafe, "Failed to retrieve file info"}
+    end
   end
 end
