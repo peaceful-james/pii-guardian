@@ -214,7 +214,7 @@ defmodule PiiGuardian.NotionEventHandler do
         Enum.map_join(title, "", fn %{"plain_text" => text} -> text end)
 
       # Look for any property with a "title" type
-      title_prop = Enum.find(properties, fn {_, v} -> v["type"] == "title" end) ->
+      title_prop = Enum.find(properties, fn {_, %{"type" => type}} -> type == "title" end) ->
         case title_prop do
           {_, %{"title" => title_content}} ->
             Enum.map_join(title_content, "", fn %{"plain_text" => text} -> text end)
