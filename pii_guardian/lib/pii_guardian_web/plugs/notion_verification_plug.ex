@@ -14,6 +14,7 @@ defmodule PiiGuardianWeb.Plugs.NotionVerificationPlug do
 
     ["sha256=" <> sha256_hash | _] = get_req_header(conn, "x-notion-signature")
     raw_body = conn.private[:raw_body]
+    Logger.info("Raw Notion post body: #{inspect(raw_body)}")
 
     calculated_signature =
       :hmac
