@@ -26,8 +26,6 @@ defmodule PiiGuardian.Mocks do
     @callback delete_file(file_id :: String.t()) :: {:ok, map()} | {:error, any()}
     @callback download_file(url :: String.t()) ::
                 {:ok, %{body: binary(), headers: list()}} | {:error, any()}
-    @callback list_users(cursor :: String.t() | nil, limit :: integer()) ::
-                {:ok, map()} | {:error, any()}
     @callback get_file_info(file_id :: String.t()) :: {:ok, map()} | {:error, any()}
   end
 
@@ -68,9 +66,6 @@ defmodule PiiGuardian.Mocks do
     @callback get_block(block_id :: String.t()) :: {:ok, map()} | {:error, any()}
     @callback delete_block(block_id :: String.t()) :: {:ok, map()} | {:error, any()}
     @callback get_user(user_id :: String.t()) :: {:ok, map()} | {:error, any()}
-    @callback list_users(cursor :: String.t() | nil, page_size :: integer()) ::
-                {:ok, map()} | {:error, any()}
-    @callback get_all_users() :: {:ok, list()} | {:error, any()}
     @callback download_file(url :: String.t()) :: {:ok, binary()} | {:error, any()}
   end
 

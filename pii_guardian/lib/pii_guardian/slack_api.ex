@@ -94,42 +94,6 @@ defmodule PiiGuardian.SlackApi do
   end
 
   @doc """
-  List all users in the workspace
-  https://api.slack.com/methods/users.list
-
-  Optionally takes a cursor for pagination and a limit for the number of users to return.
-  """
-  def list_users(cursor \\ nil, limit \\ 100) do
-    query = [limit: limit]
-    query = if cursor, do: Keyword.put(query, :cursor, cursor), else: query
-
-    "/users.list"
-    |> get(query: query)
-    |> handle_response()
-  end
-
-  @doc """
-  Get all users in the workspace, handling pagination automatically
-  """
-  def get_all_users do
-    get_all_users_recursive(nil, [])
-  end
-
-  defp get_all_users_recursive(cursor, acc) do
-    case list_users(cursor) do
-      {:ok, %{"members" => members, "response_metadata" => %{"next_cursor" => next_cursor}}}
-      when next_cursor != "" ->
-        get_all_users_recursive(next_cursor, acc ++ members)
-
-      {:ok, %{"members" => members}} ->
-        {:ok, acc ++ members}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  @doc """
   Download a file from Slack
   """
   def download_file(url) do
