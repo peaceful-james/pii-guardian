@@ -25,7 +25,7 @@ defmodule PiiGuardian.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:test), do: ["lib", "test/support", "test/mocks"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
@@ -33,7 +33,9 @@ defmodule PiiGuardian.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:slack_elixir, "~> 1.2"},
+      {:oban, "~> 2.19"},
+      # {:slack_elixir, "~> 1.2"},
+      {:slack_elixir, path: "../../slack_elixir"},
       {:green, ">= 0.1.4", only: :dev},
       {:tailwind_formatter, "~> 0.4.2", only: :dev, runtime: false},
       {:styler, "~> 0.11", only: :dev, runtime: false},

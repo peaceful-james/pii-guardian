@@ -7,17 +7,21 @@ defmodule PiiGuardian.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      PiiGuardianWeb.Telemetry,
-      PiiGuardian.Repo,
-      {DNSCluster, query: Application.get_env(:pii_guardian, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: PiiGuardian.PubSub},
-      {Slack.Supervisor, Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)},
-      # Start a worker by calling: PiiGuardian.Worker.start_link(arg)
-      # {PiiGuardian.Worker, arg},
-      # Start to serve requests, typically the last entry
-      PiiGuardianWeb.Endpoint
-    ]
+    children =
+      [
+        PiiGuardianWeb.Telemetry,
+        PiiGuardian.Repo,
+        {DNSCluster, query: Application.get_env(:pii_guardian, :dns_cluster_query) || :ignore},
+        {Phoenix.PubSub, name: PiiGuardian.PubSub},
+        if(PiiGuardian.env() != :test,
+          do: {Slack.Supervisor, Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)}
+        ),
+        {Oban, Application.fetch_env!(:pii_guardian, Oban)},
+        # Start to serve requests, typically the last entry
+        PiiGuardianWeb.Endpoint
+      ]
+      |> List.flatten()
+      |> Enum.filter(& &1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

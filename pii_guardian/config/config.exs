@@ -8,6 +8,7 @@
 import Config
 
 config :pii_guardian,
+  env: config_env(),
   ecto_repos: [PiiGuardian.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
@@ -28,6 +29,20 @@ config :logger, :default_formatter,
   metadata: [:request_id]
 
 config :phoenix, :json_library, JSON
+
+seven_days_s = 60 * 60 * 24 * 7
+
+config :pii_guardian, Oban,
+  repo: PiiGuardian.Repo,
+  notifier: Oban.Notifiers.PG,
+  queues: [
+    slack: 3,
+    notion: 3
+  ],
+  plugins: [
+    {Oban.Plugins.Pruner, max_age: seven_days_s},
+    {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(30)}
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
