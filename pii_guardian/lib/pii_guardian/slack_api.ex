@@ -68,8 +68,14 @@ defmodule PiiGuardian.SlackApi do
   https://api.slack.com/methods/files.delete
   """
   def delete_file(file_id) do
-    "/files.delete"
-    |> post(%{file: file_id})
+    [
+      {Tesla.Middleware.BaseUrl, "https://slack.com/api"},
+      Tesla.Middleware.JSON,
+      {Tesla.Middleware.Headers, [{"authorization", "Bearer #{admin_token()}"}]},
+      Tesla.Middleware.Logger
+    ]
+    |> Tesla.client()
+    |> Tesla.post("/files.delete", %{file: file_id})
     |> handle_response()
   end
 
