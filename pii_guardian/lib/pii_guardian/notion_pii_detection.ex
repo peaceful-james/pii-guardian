@@ -15,7 +15,7 @@ defmodule PiiGuardian.NotionPiiDetection do
   def detect_pii_in_page(page_id) when is_binary(page_id) do
     Logger.debug("Checking Notion page for PII: #{page_id}")
 
-    case NotionApi.get_all_page_content(page_id) do
+    case notion_api().get_all_page_content(page_id) do
       {:ok, blocks} ->
         Logger.debug("Retrieved blocks for page ID: #{page_id}")
         check_blocks_for_pii(blocks, page_id)
@@ -35,7 +35,7 @@ defmodule PiiGuardian.NotionPiiDetection do
   def detect_pii_in_block(block_id) when is_binary(block_id) do
     Logger.debug("Checking Notion block for PII: #{block_id}")
 
-    case NotionApi.get_block(block_id) do
+    case notion_api().get_block(block_id) do
       {:ok, block} ->
         case extract_text_from_block(block) do
           nil ->
@@ -60,6 +60,8 @@ defmodule PiiGuardian.NotionPiiDetection do
 
   # Private helper functions
 
+  defp notion_api, do: Application.get_env(:pii_guardian, :notion_api, NotionApi)
+
   defp check_blocks_for_pii(blocks, page_id) do
     # Extract all text content from blocks
     text_content =
@@ -69,19 +71,14 @@ defmodule PiiGuardian.NotionPiiDetection do
       |> Enum.join("\n\n")
       |> String.trim()
 
-    # If there's no text content, it's safe
-    if text_content == "" do
-      :safe
-    else
-      # Check the combined text for PII
-      case AnthropicPiiDetection.detect_pii_in_text(text_content) do
-        :safe ->
-          # If combined text is safe, check for file blocks
-          check_files_in_blocks(blocks, page_id)
+    # Check the combined text for PII
+    case AnthropicPiiDetection.detect_pii_in_text(text_content) do
+      :safe ->
+        # If combined text is safe, check for file blocks
+        check_files_in_blocks(blocks, page_id)
 
-        {:unsafe, explanation} ->
-          {:unsafe, page_id, explanation}
-      end
+      {:unsafe, explanation} ->
+        {:unsafe, page_id, explanation}
     end
   end
 
@@ -128,7 +125,7 @@ defmodule PiiGuardian.NotionPiiDetection do
     if file_url do
       Logger.debug("Retrieving file content from URL: #{file_url}")
 
-      case NotionApi.download_file(file_url) do
+      case notion_api().download_file(file_url) do
         {:ok, %{body: body, mimetype: mimetype}} ->
           # Check the file content for PII
           case AnthropicPiiDetection.detect_pii_in_file(body, file_type, mimetype) do

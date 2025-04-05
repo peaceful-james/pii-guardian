@@ -86,7 +86,7 @@ defmodule PiiGuardian.AnthropicPiiDetection do
   defp parse_response({:ok, %{"content" => [%{"text" => response_text}]}}) do
     case response_text do
       @safe_response_prefix <> _ -> :safe
-      @unsafe_response_prefix <> explanation -> {:unsafe, explanation}
+      @unsafe_response_prefix <> explanation -> {:unsafe, String.trim(explanation)}
     end
   end
 end

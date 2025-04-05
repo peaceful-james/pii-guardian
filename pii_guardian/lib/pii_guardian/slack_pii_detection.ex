@@ -7,8 +7,6 @@ defmodule PiiGuardian.SlackPiiDetection do
 
   require Logger
 
-  defp slack_api, do: Application.get_env(:pii_guardian, :slack_api, SlackApi)
-
   @doc """
   Detects if a Slack event contains PII (Personally Identifiable Information).
   """
@@ -33,4 +31,6 @@ defmodule PiiGuardian.SlackPiiDetection do
         {:unsafe, "Failed to retrieve file info"}
     end
   end
+
+  defp slack_api, do: Application.get_env(:pii_guardian, :slack_api, SlackApi)
 end
