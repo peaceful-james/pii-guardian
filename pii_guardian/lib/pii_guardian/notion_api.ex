@@ -105,6 +105,38 @@ defmodule PiiGuardian.NotionApi do
     {:error, "Client error: #{inspect(error)}"}
   end
 
+  @doc """
+  Download a file from a URL
+  This can be used for files referenced in Notion, which may be hosted on external services
+  """
+  def download_file(url) do
+    # Create a Tesla client for downloading files
+    # We don't use bearer auth for this since the URL should already have authentication
+    # embedded or be publicly accessible
+    client =
+      Tesla.client([
+        Tesla.Middleware.FollowRedirects
+      ])
+
+    client
+    |> Tesla.get(url)
+    |> handle_download_response()
+  end
+
+  defp handle_download_response({:ok, %{status: status, body: body}}) when status in 200..299 do
+    {:ok, body}
+  end
+
+  defp handle_download_response({:ok, %{status: status}}) do
+    Logger.error("Failed to download file: HTTP error #{status}")
+    {:error, "HTTP error #{status}"}
+  end
+
+  defp handle_download_response({:error, error}) do
+    Logger.error("Failed to download file: #{inspect(error)}")
+    {:error, "Download error: #{inspect(error)}"}
+  end
+
   defp get_error_message(%{"message" => message}), do: message
   defp get_error_message(_), do: "Unknown error"
 
