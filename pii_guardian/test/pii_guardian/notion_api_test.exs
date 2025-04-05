@@ -1,5 +1,5 @@
 defmodule PiiGuardian.NotionApiTest do
-  use ExUnit.Case, async: true
+  use PiiGuardian.DataCase, async: true
 
   import Tesla.Mock
 
@@ -54,9 +54,15 @@ defmodule PiiGuardian.NotionApiTest do
           }
       end)
 
-      assert {:error, error} = NotionApi.get_page(page_id)
+      assert {{:error, error}, log} =
+               with_log([level: :error], fn ->
+                 NotionApi.get_page(page_id)
+               end)
+
       assert error =~ "HTTP error 404"
       assert error =~ "Page not found"
+      assert log =~ ~s(GET https://api.notion.com/v1/pages/invalid123 -> 404)
+      assert log =~ ~s(Notion API HTTP error: 404, %{"message" => "Page not found"})
     end
 
     test "returns error when client error occurs" do
@@ -67,9 +73,14 @@ defmodule PiiGuardian.NotionApiTest do
           {:error, :timeout}
       end)
 
-      assert {:error, error} = NotionApi.get_page(page_id)
+      assert {{:error, error}, log} =
+               with_log([level: :error], fn ->
+                 NotionApi.get_page(page_id)
+               end)
+
       assert error =~ "Client error"
       assert error =~ "timeout"
+      assert log =~ "Notion API client error: :timeout"
     end
   end
 
@@ -154,8 +165,13 @@ defmodule PiiGuardian.NotionApiTest do
           }
       end)
 
-      assert {:error, error} = NotionApi.delete_page(page_id)
+      assert {{:error, error}, log} =
+               with_log([level: :error], fn ->
+                 NotionApi.delete_page(page_id)
+               end)
+
       assert error =~ "Permission denied"
+      assert log =~ "PATCH https://api.notion.com/v1/pages/nodelete123 -> 403"
     end
   end
 
@@ -190,8 +206,13 @@ defmodule PiiGuardian.NotionApiTest do
           }
       end)
 
-      assert {:error, error} = NotionApi.get_block(block_id)
+      assert {{:error, error}, log} =
+               with_log([level: :error], fn ->
+                 NotionApi.get_block(block_id)
+               end)
+
       assert error =~ "Block not found"
+      assert log =~ "GET https://api.notion.com/v1/blocks/nonexistent -> 404"
     end
   end
 
@@ -290,8 +311,13 @@ defmodule PiiGuardian.NotionApiTest do
           }
       end)
 
-      assert {:error, error} = NotionApi.get_all_page_content(page_id)
+      assert {{:error, error}, log} =
+               with_log([level: :error], fn ->
+                 NotionApi.get_all_page_content(page_id)
+               end)
+
       assert error =~ "Server error"
+      assert log =~ "GET https://api.notion.com/v1/blocks/error_page/children -> 500"
     end
   end
 
@@ -324,8 +350,13 @@ defmodule PiiGuardian.NotionApiTest do
           }
       end)
 
-      assert {:error, error} = NotionApi.download_file(url)
+      assert {{:error, error}, log} =
+               with_log([level: :error], fn ->
+                 NotionApi.download_file(url)
+               end)
+
       assert error =~ "HTTP error 404"
+      assert log =~ "Failed to download file: HTTP error 404"
     end
 
     test "handles network errors" do
@@ -336,9 +367,14 @@ defmodule PiiGuardian.NotionApiTest do
           {:error, :timeout}
       end)
 
-      assert {:error, error} = NotionApi.download_file(url)
+      assert {{:error, error}, log} =
+               with_log([level: :error], fn ->
+                 NotionApi.download_file(url)
+               end)
+
       assert error =~ "Download error"
       assert error =~ "timeout"
+      assert log =~ "Failed to download file: :timeout"
     end
   end
 end
