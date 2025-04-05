@@ -10,7 +10,16 @@ defmodule PiiGuardian.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      test_coverage: [tool: ExCoveralls, export: "cov"],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.xml": :test,
+        "coveralls.json": :test
+      ]
     ]
   end
 
@@ -33,6 +42,7 @@ defmodule PiiGuardian.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:excoveralls, "~> 0.18.0", only: :test},
       {:finch, "~> 0.16"},
       {:tesla, "~> 1.14"},
       {:anthropix, "~> 0.6.1"},
