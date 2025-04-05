@@ -124,7 +124,7 @@ defmodule PiiGuardian.Slackbot do
         user_name = user["profile"]["real_name"] || user["name"] || "there"
 
         # Open a DM channel with the user
-        case user_id |> PiiGuardian.SlackApi.open_dm() |> IO.inspect(label: "Open DM result") do
+        case PiiGuardian.SlackApi.open_dm(user_id) do
           {:ok, %{"channel" => %{"id" => dm_channel_id}}} ->
             # Send the notification message
             message = """
@@ -151,9 +151,7 @@ defmodule PiiGuardian.Slackbot do
             =========================================================================================
             """
 
-            case dm_channel_id
-                 |> PiiGuardian.SlackApi.post_message(message)
-                 |> IO.inspect(label: "post msg result") do
+            case PiiGuardian.SlackApi.post_message(dm_channel_id, message) do
               {:ok, _} ->
                 Logger.info("Successfully sent Notion PII notification to #{user_name} via Slack")
                 :ok

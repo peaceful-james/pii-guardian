@@ -41,28 +41,7 @@ defmodule PiiGuardian.SlackApi do
   Uses the admin token to post messages, allowing for more permissions than the bot token.
   """
   def post_message(channel, text, opts \\ %{}) do
-    payload =
-      Map.merge(
-        %{
-          channel: channel,
-          text: text
-        },
-        opts
-      )
-
-    # Create a client with admin token to ensure we have permissions
-    # to post in any channel, including DMs with users
-    # client =
-    # Tesla.client([
-    # {Tesla.Middleware.BaseUrl, "https://slack.com/api"},
-    # Tesla.Middleware.JSON,
-    # {Tesla.Middleware.BearerAuth, token: bot_token()},
-    # Tesla.Middleware.Logger
-    # ])
-
-    # client
-    # |> Tesla.post("/chat.postMessage", payload)
-    # |> handle_response()
+    payload = Map.merge(%{channel: channel, text: text}, opts)
 
     "/chat.postMessage"
     |> post(payload)
@@ -76,22 +55,6 @@ defmodule PiiGuardian.SlackApi do
   Uses the admin token to ensure permissions to open DMs with any user.
   """
   def open_dm(user_id) do
-    # Create a client with admin token to ensure we have permissions
-    # to open DMs with any user
-    # client =
-      # Tesla.client([
-        # {Tesla.Middleware.BaseUrl, "https://slack.com/api"},
-        # Tesla.Middleware.JSON,
-        # {Tesla.Middleware.BearerAuth, token: bot_token()},
-        # Tesla.Middleware.Logger
-      # ])
-
-    # client
-    # |> Tesla.post("/conversations.open", %{
-      # users: user_id
-    # })
-    # |> handle_response()
-
     "/conversations.open"
     |> post(%{users: user_id})
     |> handle_response()
@@ -103,9 +66,7 @@ defmodule PiiGuardian.SlackApi do
   """
   def delete_file(file_id) do
     "/files.delete"
-    |> post(%{
-      file: file_id
-    })
+    |> post(%{file: file_id})
     |> handle_response()
   end
 
