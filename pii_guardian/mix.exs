@@ -48,7 +48,7 @@ defmodule PiiGuardian.MixProject do
       {:anthropix, "~> 0.6.1"},
       {:oban, "~> 2.19"},
       # {:slack_elixir, "~> 1.2"},
-      {:slack_elixir, path: "../../slack_elixir"},
+      {:slack_elixir, github: "peaceful-james/slack_elixir", branch: "delete-message"},
       {:green, ">= 0.1.4", only: :dev},
       {:tailwind_formatter, "~> 0.4.2", only: :dev, runtime: false},
       {:styler, "~> 0.11", only: :dev, runtime: false},
