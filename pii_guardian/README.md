@@ -31,6 +31,7 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - use CloudCIX for chatbot with corpus
 - switch the `slack_elixir` dep from path to my fork on github
 - we should retry slack api to get file info
+- with new slack api module, the changes to slack_elixir may not be necessary
 
 ## For dev
 
