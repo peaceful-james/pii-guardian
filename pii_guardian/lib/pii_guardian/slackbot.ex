@@ -7,7 +7,6 @@ defmodule PiiGuardian.Slackbot do
   """
   use Slack.Bot
 
-  alias PiiGuardian.SlackApi
   alias PiiGuardian.SlackObanWorker
 
   require Logger
@@ -39,6 +38,26 @@ defmodule PiiGuardian.Slackbot do
     """)
 
     delete_message(channel, ts)
+  end
+
+  def delete_file_and_dm_author(
+        file,
+        %{"channel" => channel, "user" => user} = _event,
+        explanation
+      ) do
+    IO.inspect(file, label: "DELETE THIS FILE PLEASE")
+
+    dm(channel, user, """
+    Hi there!
+
+    I just wanted to let you know that I deleted your file because it contained sensitive information.
+
+    Here is the reason why I deleted it:
+
+    > #{explanation}
+
+    Please be careful about sharing personal information in public channels.
+    """)
   end
 
   def list_registry_keys do
