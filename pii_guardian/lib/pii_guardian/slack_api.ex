@@ -6,10 +6,10 @@ defmodule PiiGuardian.SlackApi do
 
   require Logger
 
-  plug Tesla.Middleware.BaseUrl, "https://slack.com/api"
-  plug Tesla.Middleware.JSON
-  plug Tesla.Middleware.BearerAuth, token: slack_token()
-  plug Tesla.Middleware.Logger
+  plug(Tesla.Middleware.BaseUrl, "https://slack.com/api")
+  plug(Tesla.Middleware.JSON)
+  plug(Tesla.Middleware.BearerAuth, token: bot_token())
+  plug(Tesla.Middleware.Logger)
 
   @doc """
   Retrieve information about a file
@@ -37,6 +37,8 @@ defmodule PiiGuardian.SlackApi do
   @doc """
   Post a message to a channel
   https://api.slack.com/methods/chat.postMessage
+
+  Uses the admin token to post messages, allowing for more permissions than the bot token.
   """
   def post_message(channel, text, opts \\ %{}) do
     payload =
@@ -48,6 +50,20 @@ defmodule PiiGuardian.SlackApi do
         opts
       )
 
+    # Create a client with admin token to ensure we have permissions
+    # to post in any channel, including DMs with users
+    # client =
+    # Tesla.client([
+    # {Tesla.Middleware.BaseUrl, "https://slack.com/api"},
+    # Tesla.Middleware.JSON,
+    # {Tesla.Middleware.BearerAuth, token: bot_token()},
+    # Tesla.Middleware.Logger
+    # ])
+
+    # client
+    # |> Tesla.post("/chat.postMessage", payload)
+    # |> handle_response()
+
     "/chat.postMessage"
     |> post(payload)
     |> handle_response()
@@ -56,12 +72,28 @@ defmodule PiiGuardian.SlackApi do
   @doc """
   Open a direct message conversation with a user
   https://api.slack.com/methods/conversations.open
+
+  Uses the admin token to ensure permissions to open DMs with any user.
   """
   def open_dm(user_id) do
+    # Create a client with admin token to ensure we have permissions
+    # to open DMs with any user
+    # client =
+      # Tesla.client([
+        # {Tesla.Middleware.BaseUrl, "https://slack.com/api"},
+        # Tesla.Middleware.JSON,
+        # {Tesla.Middleware.BearerAuth, token: bot_token()},
+        # Tesla.Middleware.Logger
+      # ])
+
+    # client
+    # |> Tesla.post("/conversations.open", %{
+      # users: user_id
+    # })
+    # |> handle_response()
+
     "/conversations.open"
-    |> post(%{
-      users: user_id
-    })
+    |> post(%{users: user_id})
     |> handle_response()
   end
 
@@ -138,7 +170,7 @@ defmodule PiiGuardian.SlackApi do
   """
   def download_file(url) do
     [
-      {Tesla.Middleware.Headers, [{"authorization", "Bearer #{slack_token()}"}]}
+      {Tesla.Middleware.Headers, [{"authorization", "Bearer #{admin_token()}"}]}
     ]
     |> Tesla.client()
     |> Tesla.get(url)
@@ -163,8 +195,11 @@ defmodule PiiGuardian.SlackApi do
     {:error, "Client error: #{inspect(error)}"}
   end
 
-  defp slack_token do
-    # Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)[:bot_token]
+  defp admin_token do
     Application.fetch_env!(:slack_elixir, :admin_user_token)
+  end
+
+  defp bot_token do
+    Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)[:bot_token]
   end
 end

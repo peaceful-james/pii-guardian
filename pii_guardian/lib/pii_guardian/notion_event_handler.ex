@@ -153,16 +153,39 @@ defmodule PiiGuardian.NotionEventHandler do
   end
 
   defp notify_author(%{"id" => author_id, "type" => "person"}, page_id, explanation) do
+    # Get the author's email from Notion
     email =
       case NotionApi.get_user(author_id) do
         {:ok, user} -> get_user_email(user)
         {:error, _} -> nil
       end
 
+    # Get the page title if possible
+    page_title =
+      case NotionApi.get_page(page_id) do
+        {:ok, page} ->
+          get_page_title(page) || "Notion Page"
+
+        {:error, _} ->
+          "Notion Page"
+      end
+
     if email do
-      Logger.info(
-        "Notification sent to author (#{author_id}) with email #{email} about PII in page #{page_id}: #{explanation}"
-      )
+      # Try to notify the user via Slack
+      case PiiGuardian.Slackbot.dm_author_about_notion_pii(
+             email,
+             page_id,
+             page_title,
+             explanation
+           ) do
+        :ok ->
+          Logger.info("Successfully notified author via Slack about PII in page #{page_id}")
+
+        {:error, reason} ->
+          Logger.warning(
+            "Failed to notify author via Slack: #{reason}. Email: #{email}, Page: #{page_id}"
+          )
+      end
     else
       Logger.warning("No email found for author #{author_id}, unable to send notification")
     end
@@ -177,4 +200,33 @@ defmodule PiiGuardian.NotionEventHandler do
     do: email
 
   defp get_user_email(_), do: nil
+
+  # Extract page title from page data
+  defp get_page_title(%{"properties" => properties}) do
+    # Look for a title property, which could be in a few different forms
+    cond do
+      # Check for "title" property
+      title = get_in(properties, ["title", "title"]) ->
+        Enum.map_join(title, "", fn %{"plain_text" => text} -> text end)
+
+      # Check for "Name" property
+      title = get_in(properties, ["Name", "title"]) ->
+        Enum.map_join(title, "", fn %{"plain_text" => text} -> text end)
+
+      # Look for any property with a "title" type
+      title_prop = Enum.find(properties, fn {_, v} -> v["type"] == "title" end) ->
+        case title_prop do
+          {_, %{"title" => title_content}} ->
+            Enum.map_join(title_content, "", fn %{"plain_text" => text} -> text end)
+
+          _ ->
+            nil
+        end
+
+      true ->
+        nil
+    end
+  end
+
+  defp get_page_title(_), do: nil
 end

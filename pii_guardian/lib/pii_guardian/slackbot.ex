@@ -106,6 +106,74 @@ defmodule PiiGuardian.Slackbot do
     """)
   end
 
+  @doc """
+  Send a DM to a user about their Notion page being archived due to PII.
+
+  This function looks up a Slack user by email and sends them a direct message
+  explaining that their Notion page was archived because it contained PII.
+
+  Returns :ok if the message was sent successfully, or {:error, reason} if 
+  something went wrong.
+  """
+  def dm_author_about_notion_pii(email, page_id, page_title, explanation) do
+    # Look up the Slack user by email
+    case PiiGuardian.SlackApi.lookup_user_by_email(email) do
+      {:ok, %{"user" => user}} ->
+        Logger.info("Going to DM notion user with email #{email} on Slack.")
+        user_id = user["id"]
+        user_name = user["profile"]["real_name"] || user["name"] || "there"
+
+        # Open a DM channel with the user
+        case user_id |> PiiGuardian.SlackApi.open_dm() |> IO.inspect(label: "Open DM result") do
+          {:ok, %{"channel" => %{"id" => dm_channel_id}}} ->
+            # Send the notification message
+            message = """
+            =========================================================================================
+
+
+
+            Hi #{user_name}!
+
+            I just wanted to let you know that I archived your Notion page "#{page_title}" because it contained sensitive information.
+
+            Page ID: #{page_id}
+
+            Here is the reason why I archived it:
+
+            ```
+            #{explanation}
+            ```
+
+            Please be careful about sharing personal information in Notion pages that could be accessed by others.
+
+
+
+            =========================================================================================
+            """
+
+            case dm_channel_id
+                 |> PiiGuardian.SlackApi.post_message(message)
+                 |> IO.inspect(label: "post msg result") do
+              {:ok, _} ->
+                Logger.info("Successfully sent Notion PII notification to #{user_name} via Slack")
+                :ok
+
+              {:error, reason} ->
+                Logger.error("Failed to send Slack message: #{inspect(reason)}")
+                {:error, "Failed to send Slack message: #{inspect(reason)}"}
+            end
+
+          {:error, reason} ->
+            Logger.error("Failed to open DM channel: #{inspect(reason)}")
+            {:error, "Failed to open DM channel: #{inspect(reason)}"}
+        end
+
+      {:error, reason} ->
+        Logger.error("Failed to find Slack user by email #{email}: #{inspect(reason)}")
+        {:error, "Failed to find Slack user by email: #{inspect(reason)}"}
+    end
+  end
+
   def list_registry_keys do
     Registry.select(Slack.MessageServerRegistry, [{{:"$1", :"$2", :"$3"}, [], [:"$1"]}])
   end
