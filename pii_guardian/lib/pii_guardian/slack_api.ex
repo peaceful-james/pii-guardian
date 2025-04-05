@@ -86,7 +86,6 @@ defmodule PiiGuardian.SlackApi do
     ]
     |> Tesla.client()
     |> Tesla.get(url)
-    |> handle_response()
   end
 
   defp handle_response({:ok, %{status: status, body: body}}) when status in 200..299 do
@@ -109,6 +108,7 @@ defmodule PiiGuardian.SlackApi do
   end
 
   defp slack_token do
-    Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)[:bot_token]
+    # Application.fetch_env!(:pii_guardian, PiiGuardian.Slackbot)[:bot_token]
+    Application.fetch_env!(:slack_elixir, :admin_user_token)
   end
 end

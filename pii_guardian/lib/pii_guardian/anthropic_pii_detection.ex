@@ -3,6 +3,8 @@ defmodule PiiGuardian.AnthropicPiiDetection do
   Detect if a text or PDF contains PII (Personally Identifiable Information) using the Anthropic's API.
   """
 
+  require Logger
+
   @type result :: :safe | {:unsafe, String.t()}
 
   @safe_response_prefix "[NO_PII_SAFE]"
@@ -19,7 +21,10 @@ defmodule PiiGuardian.AnthropicPiiDetection do
     Anthropix.init(api_key())
   end
 
-  @spec detect_pii_in_text(String.t()) :: result
+  @spec detect_pii_in_text(String.t() | nil) :: result
+  def detect_pii_in_text(nil), do: :safe
+  def detect_pii_in_text(""), do: :safe
+
   def detect_pii_in_text(text) when is_binary(text) do
     messages = [
       %{role: "user", content: text},
@@ -31,25 +36,29 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
     init_client()
     |> Anthropix.chat(chat_opts)
+    |> tap(&Logger.debug("Anthropic API response for text: #{inspect(&1)}"))
     |> parse_response()
   end
 
-  def detect_pii_in_file(content, filetype, mimetype) do
-    content =
-      case filetype do
-        "text" ->
-          %{type: "text", text: content}
+  def detect_pii_in_file(content, "text", _mimetype) do
+    detect_pii_in_text(content)
+  end
 
-        filetype ->
-          source = %{type: "base64", media_type: mimetype, data: Base.encode64(content)}
-          %{type: filetype, source: source}
+  def detect_pii_in_file(content, _filetype, mimetype) do
+    source = %{type: "base64", media_type: mimetype, data: Base.encode64(content)}
+
+    type =
+      if String.starts_with?(mimetype, "image/") do
+        "image"
+      else
+        "document"
       end
 
+    content =
+      %{type: type, source: source}
+
     messages = [
-      %{
-        role: "user",
-        content: [content]
-      },
+      %{role: "user", content: [content]},
       %{role: "user", content: "Does this file contain PII?"},
       %{role: "user", content: @consistent_format_prompt}
     ]
@@ -58,6 +67,7 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
     init_client()
     |> Anthropix.chat(chat_opts)
+    |> tap(&Logger.debug("Anthropic API response for file: #{inspect(&1)}"))
     |> parse_response()
   end
 

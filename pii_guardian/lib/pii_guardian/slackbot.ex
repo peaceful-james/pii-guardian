@@ -45,7 +45,7 @@ defmodule PiiGuardian.Slackbot do
         %{"channel" => channel, "user" => user} = _event,
         explanation
       ) do
-    IO.inspect(file, label: "DELETE THIS FILE PLEASE")
+    PiiGuardian.SlackApi.delete_file(file["id"])
 
     dm(channel, user, """
     Hi there!
