@@ -149,7 +149,13 @@ defmodule PiiGuardian.NotionEventHandlerTest do
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
 
-      assert NotionEventHandler.handle(event) == :ok
+      captured_log =
+        capture_log([level: :warning], fn ->
+          assert NotionEventHandler.handle(event) == :ok
+        end)
+
+      assert captured_log =~
+               "PII detected in newly created page fake-page-id-87654321: Found email addresses and phone numbers"
     end
 
     test "handles created page with PII (returns list-based result)" do
@@ -292,7 +298,13 @@ defmodule PiiGuardian.NotionEventHandlerTest do
         {:error, "Permission denied"}
       end)
 
-      assert {:error, "Permission denied"} = NotionEventHandler.handle(event)
+      captured_log =
+        capture_log([level: :warning], fn ->
+          assert {:error, "Permission denied"} = NotionEventHandler.handle(event)
+        end)
+
+      assert captured_log =~
+               "PII detected in newly created page fake-page-id-87654321: Found sensitive data"
     end
   end
 
@@ -415,7 +427,12 @@ defmodule PiiGuardian.NotionEventHandlerTest do
       # We won't mock Slackbot.dm_author_about_notion_pii directly
       # Instead, we'll let the implementation call SlackApi functions directly
 
-      assert NotionEventHandler.handle(event) == :ok
+      captured_log =
+        capture_log(fn ->
+          assert NotionEventHandler.handle(event) == :ok
+        end)
+
+      assert captured_log =~ "PII detected in page fake-page-id-87654321"
     end
 
     test "handles content update with no blocks (check whole page)" do
@@ -514,7 +531,16 @@ defmodule PiiGuardian.NotionEventHandlerTest do
 
       # No expectation for Slackbot.dm_author_about_notion_pii since email is missing
 
-      assert NotionEventHandler.handle(event) == :ok
+      captured_log =
+        capture_log([level: :warning], fn ->
+          assert NotionEventHandler.handle(event) == :ok
+        end)
+
+      assert captured_log =~
+               "PII detected in newly created page fake-page-id-87654321: Found SSN in content"
+
+      assert captured_log =~
+               "No email found for author fake-person-id-12345678, unable to send notification"
     end
 
     test "handles non-person author" do
@@ -646,7 +672,13 @@ defmodule PiiGuardian.NotionEventHandlerTest do
       # which uses 2 parameters instead of 3 as defined in the behavior
       expect(MockSlackApi, :post_message, 0, fn _, _, _ -> {:ok, %{"ok" => true}} end)
 
-      assert NotionEventHandler.handle(event) == :ok
+      captured_log =
+        capture_log(fn ->
+          assert NotionEventHandler.handle(event) == :ok
+        end)
+
+      assert captured_log =~
+               "Failed to open DM channel: \"Failed to open DM channel\". Email: author@example.com, Page: fake-page-id"
     end
 
     test "extracts page title from different property formats" do

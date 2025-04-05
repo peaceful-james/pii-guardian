@@ -26,6 +26,7 @@ defmodule PiiGuardianWeb.ConnCase do
       import Phoenix.ConnTest
       import PiiGuardianWeb.ConnCase
       import Plug.Conn
+      import ExUnit.CaptureLog
 
       @endpoint PiiGuardianWeb.Endpoint
     end

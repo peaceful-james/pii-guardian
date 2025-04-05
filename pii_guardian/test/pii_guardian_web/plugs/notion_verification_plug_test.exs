@@ -54,13 +54,18 @@ defmodule PiiGuardianWeb.Plugs.NotionVerificationPlugTest do
         |> put_req_header("x-notion-signature", "sha256=#{invalid_signature}")
         |> Map.put(:private, %{raw_body: body})
 
-      # Pass the conn through the plug
-      result = NotionVerificationPlug.call(conn, [])
+      captured_log =
+        capture_log([level: :warning], fn ->
+          # Pass the conn through the plug
+          result = NotionVerificationPlug.call(conn, [])
 
-      # Assert the connection was halted with a 401 status
-      assert result.halted
-      assert result.status == 401
-      assert result.resp_body == Jason.encode!(%{error: "Unauthorized"})
+          # Assert the connection was halted with a 401 status
+          assert result.halted
+          assert result.status == 401
+          assert result.resp_body == Jason.encode!(%{error: "Unauthorized"})
+        end)
+
+      assert captured_log =~ "Notion webhook verification failed"
     end
 
     test "rejects requests with missing signature header", %{conn: conn} do
@@ -94,13 +99,18 @@ defmodule PiiGuardianWeb.Plugs.NotionVerificationPlugTest do
         |> put_req_header("x-notion-signature", "sha256=#{signature}")
         |> Map.put(:private, %{raw_body: tampered_body})
 
-      # Pass the conn through the plug
-      result = NotionVerificationPlug.call(conn, [])
+      captured_log =
+        capture_log([level: :warning], fn ->
+          # Pass the conn through the plug
+          result = NotionVerificationPlug.call(conn, [])
 
-      # Assert the connection was halted with a 401 status
-      assert result.halted
-      assert result.status == 401
-      assert result.resp_body == Jason.encode!(%{error: "Unauthorized"})
+          # Assert the connection was halted with a 401 status
+          assert result.halted
+          assert result.status == 401
+          assert result.resp_body == Jason.encode!(%{error: "Unauthorized"})
+        end)
+
+      assert captured_log =~ "Notion webhook verification failed"
     end
 
     test "plug initialization", %{conn: _conn} do

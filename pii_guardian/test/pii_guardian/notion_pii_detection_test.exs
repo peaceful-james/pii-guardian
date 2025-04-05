@@ -184,7 +184,14 @@ defmodule PiiGuardian.NotionPiiDetectionTest do
       end)
 
       expected = {:unsafe, page_id, "Failed to retrieve page content: Access denied"}
-      assert NotionPiiDetection.detect_pii_in_page(page_id) == expected
+
+      captured_log =
+        capture_log([level: :error], fn ->
+          assert NotionPiiDetection.detect_pii_in_page(page_id) == expected
+        end)
+
+      assert captured_log =~
+               "Failed to retrieve content for page ID: fake-page-id-12345, reason: Access denied"
     end
   end
 
@@ -339,7 +346,12 @@ defmodule PiiGuardian.NotionPiiDetectionTest do
         {:unsafe, block_id,
          "Failed to download file for PII analysis: Download failed: 404 Not Found"}
 
-      assert NotionPiiDetection.detect_pii_in_block(block_id) == expected
+      captured_log =
+        capture_log([level: :error], fn ->
+          assert NotionPiiDetection.detect_pii_in_block(block_id) == expected
+        end)
+
+      assert captured_log =~ "Failed to download file: Download failed: 404 Not Found"
     end
 
     test "returns {:unsafe, block_id, explanation} when file URL can't be found" do
@@ -357,7 +369,13 @@ defmodule PiiGuardian.NotionPiiDetectionTest do
       end)
 
       expected = {:unsafe, block_id, "No file URL found in block"}
-      assert NotionPiiDetection.detect_pii_in_block(block_id) == expected
+
+      captured_log =
+        capture_log([level: :error], fn ->
+          assert NotionPiiDetection.detect_pii_in_block(block_id) == expected
+        end)
+
+      assert captured_log =~ "No file URL found in block: block-id-12345"
     end
 
     test "returns error result when block can't be retrieved" do
@@ -369,7 +387,13 @@ defmodule PiiGuardian.NotionPiiDetectionTest do
       end)
 
       expected = {:unsafe, block_id, "Failed to retrieve block content: Block not found"}
-      assert NotionPiiDetection.detect_pii_in_block(block_id) == expected
+
+      captured_log =
+        capture_log([level: :error], fn ->
+          assert NotionPiiDetection.detect_pii_in_block(block_id) == expected
+        end)
+
+      assert captured_log =~ "Failed to retrieve block: block-id-12345, reason: Block not found"
     end
   end
 

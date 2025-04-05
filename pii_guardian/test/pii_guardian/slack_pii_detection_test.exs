@@ -80,8 +80,13 @@ defmodule PiiGuardian.SlackPiiDetectionTest do
         {:error, "Failed to download file"}
       end)
 
-      assert SlackPiiDetection.detect_pii_in_file(file) ==
-               {:unsafe, "Failed to retrieve file info"}
+      captured_log =
+        capture_log([level: :error], fn ->
+          result = SlackPiiDetection.detect_pii_in_file(file)
+          assert result == {:unsafe, "Failed to retrieve file info"}
+        end)
+
+      assert captured_log =~ "Failed to retrieve file info for file ID: F12345"
     end
 
     test "returns unsafe when getting file info fails" do
@@ -98,8 +103,13 @@ defmodule PiiGuardian.SlackPiiDetectionTest do
         {:error, "File not found"}
       end)
 
-      assert SlackPiiDetection.detect_pii_in_file(file) ==
-               {:unsafe, "Failed to retrieve file info"}
+      captured_log =
+        capture_log([level: :error], fn ->
+          result = SlackPiiDetection.detect_pii_in_file(file)
+          assert result == {:unsafe, "Failed to retrieve file info"}
+        end)
+
+      assert captured_log =~ "Failed to retrieve file info for file ID: F12345"
     end
   end
 end
