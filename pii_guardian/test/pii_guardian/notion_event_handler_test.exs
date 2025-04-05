@@ -382,15 +382,12 @@ defmodule PiiGuardian.NotionEventHandlerTest do
 
   describe "notify_author/3" do
     test "handles missing email for author" do
-      page_id = "fake-page-id"
-      author_id = "fake-author-id"
       explanation = "Found SSN in content"
 
       # Create event with authors
-      event = %{
-        "entity" => %{"id" => page_id},
-        "authors" => [%{"id" => author_id, "type" => "person"}]
-      }
+      event = NotionEventMocks.created_issue_event()
+      page_id = event["entity"]["id"]
+      author_id = event["authors"] |> hd() |> Map.get("id")
 
       # Mock NotionApi.get_page
       expect(MockNotionApi, :get_page, fn ^page_id ->

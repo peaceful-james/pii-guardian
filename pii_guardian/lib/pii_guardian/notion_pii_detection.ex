@@ -214,6 +214,7 @@ defmodule PiiGuardian.NotionPiiDetection do
   defp extract_text_from_rich_text(rich_text) when is_list(rich_text) do
     Enum.map_join(rich_text, "", fn
       %{"type" => "text", "text" => %{"content" => content}} -> content
+      %{"plain_text" => plain_text} -> plain_text
       _ -> ""
     end)
   end
