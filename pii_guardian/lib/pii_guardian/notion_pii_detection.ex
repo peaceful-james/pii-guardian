@@ -39,7 +39,7 @@ defmodule PiiGuardian.NotionPiiDetection do
         case extract_text_from_block(block) do
           nil ->
             # Non-text block, check if it's a file
-            check_file_in_block(block, block_id)
+            check_file_in_block(block)
 
           text when is_binary(text) ->
             case AnthropicPiiDetection.detect_pii_in_text(text) do
@@ -93,10 +93,9 @@ defmodule PiiGuardian.NotionPiiDetection do
       :safe
     else
       # Check each file block for PII
-      Enum.reduce_while(file_blocks, :safe, fn block, _acc ->
-        block_id = block["id"]
-
-        case check_file_in_block(block, block_id) do
+      Enum.reduce_while(file_blocks, :safe, fn %{"id" => block_id} = block, _acc ->
+        Logger.info("Checking Notion file block for PII: #{block_id}")
+        case check_file_in_block(block) do
           :safe -> {:cont, :safe}
           {:unsafe, _, explanation} -> {:halt, {:unsafe, page_id, explanation}}
         end
@@ -109,7 +108,7 @@ defmodule PiiGuardian.NotionPiiDetection do
   defp is_file_block?(%{"type" => "pdf"}), do: true
   defp is_file_block?(_), do: false
 
-  defp check_file_in_block(%{"type" => file_type} = block, block_id)
+  defp check_file_in_block(%{"id" => block_id, "type" => file_type} = block)
        when file_type in ["file", "image", "pdf"] do
     # Extract file data from the block using the file_type as the key
     file_data = Map.get(block, file_type)
@@ -121,10 +120,7 @@ defmodule PiiGuardian.NotionPiiDetection do
       Logger.debug("Retrieving file content from URL: #{file_url}")
 
       case NotionApi.download_file(file_url) do
-        {:ok, body} ->
-          # Determine the mimetype based on file_type
-          mimetype = determine_mimetype(file_type, file_data)
-
+        {:ok, %{body: body, mimetype: mimetype}} ->
           # Check the file content for PII
           case AnthropicPiiDetection.detect_pii_in_file(body, file_type, mimetype) do
             :safe -> :safe
@@ -141,7 +137,7 @@ defmodule PiiGuardian.NotionPiiDetection do
     end
   end
 
-  defp check_file_in_block(_block, _block_id), do: :safe
+  defp check_file_in_block(_block), do: :safe
 
   # Extract text from various block types
   defp extract_text_from_block(%{
@@ -222,54 +218,4 @@ defmodule PiiGuardian.NotionPiiDetection do
   defp get_file_url(%{"type" => "external", "external" => %{"url" => url}}, _), do: url
   defp get_file_url(%{"type" => "file", "file" => %{"url" => url}}, _), do: url
   defp get_file_url(_, _), do: nil
-
-  defp determine_mimetype("image", %{"caption" => caption}) do
-    # Try to determine image type from caption or default to generic image
-    cond do
-      caption |> String.downcase() |> String.ends_with?(".png") -> "image/png"
-      caption |> String.downcase() |> String.ends_with?(".jpg") -> "image/jpeg"
-      caption |> String.downcase() |> String.ends_with?(".jpeg") -> "image/jpeg"
-      caption |> String.downcase() |> String.ends_with?(".gif") -> "image/gif"
-      caption |> String.downcase() |> String.ends_with?(".webp") -> "image/webp"
-      # Default
-      true -> "image/jpeg"
-    end
-  end
-
-  defp determine_mimetype("pdf", _), do: "application/pdf"
-
-  defp determine_mimetype("file", %{"caption" => caption}) do
-    # Try to determine file type from caption or default to octet-stream
-    cond do
-      caption |> String.downcase() |> String.ends_with?(".pdf") ->
-        "application/pdf"
-
-      caption |> String.downcase() |> String.ends_with?(".doc") ->
-        "application/msword"
-
-      caption |> String.downcase() |> String.ends_with?(".docx") ->
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-
-      caption |> String.downcase() |> String.ends_with?(".xls") ->
-        "application/vnd.ms-excel"
-
-      caption |> String.downcase() |> String.ends_with?(".xlsx") ->
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
-      caption |> String.downcase() |> String.ends_with?(".ppt") ->
-        "application/vnd.ms-powerpoint"
-
-      caption |> String.downcase() |> String.ends_with?(".pptx") ->
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-
-      caption |> String.downcase() |> String.ends_with?(".txt") ->
-        "text/plain"
-
-      # Default
-      true ->
-        "application/octet-stream"
-    end
-  end
-
-  defp determine_mimetype(_, _), do: "application/octet-stream"
 end

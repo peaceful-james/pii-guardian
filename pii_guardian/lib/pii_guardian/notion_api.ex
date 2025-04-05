@@ -123,8 +123,9 @@ defmodule PiiGuardian.NotionApi do
     |> handle_download_response()
   end
 
-  defp handle_download_response({:ok, %{status: status, body: body}}) when status in 200..299 do
-    {:ok, body}
+  defp handle_download_response({:ok, %{status: status, body: body, headers: headers}}) when status in 200..299 do
+    {"content-type", mimetype} = List.keyfind(headers, "content-type", 0)
+    {:ok, %{body: body, mimetype: mimetype}}
   end
 
   defp handle_download_response({:ok, %{status: status}}) do
