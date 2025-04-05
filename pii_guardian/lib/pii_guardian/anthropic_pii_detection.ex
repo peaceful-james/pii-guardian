@@ -26,7 +26,7 @@ defmodule PiiGuardian.AnthropicPiiDetection do
 
   # Helper function to get the appropriate module
   defp anthropix do
-    Application.get_env(:pii_guardian, :anthropix)
+    Application.get_env(:pii_guardian, :anthropix, Anthropix)
   end
 
   @spec detect_pii_in_text(String.t() | nil) :: result

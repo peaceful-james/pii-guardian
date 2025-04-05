@@ -5,9 +5,13 @@ defmodule PiiGuardian.SlackEventHandler do
   alias PiiGuardian.Slackbot
   alias PiiGuardian.SlackPiiDetection
 
+  require Logger
+
   defp slackbot, do: Application.get_env(:pii_guardian, :slackbot, Slackbot)
 
   def handle(event) do
+    Logger.debug("SlackEventHandler received event: #{inspect(event, pretty: true)}")
+
     case SlackPiiDetection.detect_pii_in_text(event) do
       {:unsafe, explanation} ->
         slackbot().delete_slack_message_and_dm_author(event, explanation)
